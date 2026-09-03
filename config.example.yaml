@@ -1,0 +1,72 @@
+# Job Posting Bot configuration. Copy to config.yaml (or run `jobbot init`).
+
+search:
+  keywords:
+    - "QA Engineer"
+    - "Data Analyst"
+    - "Automation Engineer"
+  location: "United States"
+  max_age_days: 14          # only ask sites for postings this recent
+  max_pages: 3              # result pages per keyword per source (10 jobs per page)
+  fetch_descriptions: true  # open each job's detail page (slower, enables description QA)
+  max_details: 60           # cap on detail fetches per source per run
+
+sources:
+  linkedin: { enabled: true }
+  indeed: { enabled: true }
+  glassdoor: { enabled: true }
+
+browser:
+  headed: false             # `jobbot run --headed` overrides for one run
+  profile_dir: ".browser-profile"
+  delay_seconds: [1.5, 4.0] # random pause between page loads
+  timeout_seconds: 30
+
+qa:
+  include_keywords:         # title must contain at least one (case-insensitive, fuzzy)
+    - qa
+    - quality
+    - test
+    - sdet
+    - data analyst
+    - data quality
+    - automation
+    - analytics
+  exclude_keywords:         # title must contain none
+    - senior
+    - staff
+    - principal
+    - director
+    - manager
+    - lead
+    - intern
+    - clearance
+  remote_ok: true           # remote jobs pass the location check regardless of location
+  locations:                # substrings accepted for the location check (blank list = accept all)
+    - "United States"
+    - "US"
+    - "USA"
+    - ", "                  # "City, ST" pattern
+    - " Area"               # "Greater Boston Area"
+  max_age_days: 30
+  min_description_chars: 200
+  salary_bounds_usd_year: [20000, 500000]
+  blocked_companies: []
+  agency_patterns:          # regex, case-insensitive, matched against company name
+    - "staffing"
+    - "recruit"
+    - "talent"
+    - "consultants?$"
+    - "solutions? inc"
+  spam_patterns:            # regex, matched against description
+    - "earn \\$?\\d+.*(per|a) (day|week)"
+    - "no experience (needed|necessary|required)"
+    - "unlimited (earning|income)"
+    - "be your own boss"
+
+storage:
+  db_path: "data/jobs.db"
+
+export:
+  output_dir: "output"
+  filename: "jobs-{date}.xlsx"
