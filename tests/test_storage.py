@@ -34,3 +34,14 @@ def test_run_log_roundtrip(tmp_path):
         s.save_run(summary)
         got = s.last_run()
         assert got.run_id == "r1" and got.scraped == 3 and got.kept == 2 and got.blocked_sources == ["indeed"]
+
+
+def test_list_runs_newest_first(tmp_path):
+    with Storage(tmp_path / "jobs.db") as s:
+        assert s.list_runs() == [] and s.last_run() is None
+        for i in range(3):
+            s.save_run(RunSummary(run_id=f"r{i}", started_at=datetime(2026, 9, i + 1, tzinfo=timezone.utc), scraped_by_source={"indeed": i}))
+        runs = s.list_runs()
+        assert [r.run_id for r in runs] == ["r2", "r1", "r0"]
+        assert s.last_run().run_id == "r2"
+        assert [r.run_id for r in s.list_runs(limit=2)] == ["r2", "r1"]

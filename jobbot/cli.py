@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import logging
+import os
+import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from jobbot import __version__
@@ -50,6 +53,10 @@ def _parser() -> argparse.ArgumentParser:
     export.add_argument("--days", type=int, default=30, help="include jobs seen within the last N days")
 
     sub.add_parser("stats", help="print the last run summary")
+
+    ui = sub.add_parser("ui", help="open the web dashboard (needs `uv sync --extra ui`)")
+    ui.add_argument("--port", type=int, default=8501)
+    ui.add_argument("--no-browser", action="store_true", help="don't open a browser tab automatically")
     return p
 
 
@@ -154,20 +161,21 @@ def cmd_run(cfg: Config, args, export: bool) -> int:
     return 0 if jobs else 1
 
 
-def cmd_export(cfg: Config, args) -> int:
-    from datetime import timedelta
+def export_history(cfg: Config, days: int, out: str | Path | None = None) -> tuple[Path, QAReport, RunSummary]:
+    """Rebuild the workbook from jobs seen in the last `days` days (no scraping).
 
+    Raises LookupError when the history holds nothing in that window.
+    """
     with Storage(cfg.resolve(cfg.db_path)) as store:
-        since = (datetime.now(timezone.utc) - timedelta(days=args.days)).isoformat()
+        since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         jobs = store.load_jobs(since_run=since)
         summary = store.last_run()
     if not jobs:
-        log.error("no stored jobs in the last %d days; run `jobbot run` first", args.days)
-        return 1
+        raise LookupError(f"no stored jobs in the last {days} days; run `jobbot run` first")
     report = run_qa(jobs, cfg.qa)
     # counts describe the exported set, not the last scrape; keep the last run's blocked/error status
     export_summary = RunSummary(
-        run_id=f"export-{args.days}d",
+        run_id=f"export-{days}d",
         started_at=datetime.now(timezone.utc),
         scraped_by_source={s: v["scraped"] for s, v in report.per_source.items()},
         kept_by_source={s: v["kept"] for s, v in report.per_source.items()},
@@ -176,7 +184,16 @@ def cmd_export(cfg: Config, args) -> int:
         rejection_counts=dict(report.rejection_counts),
         new_count=sum(1 for j in jobs if j.is_new),
     )
-    out = build_workbook(report, jobs, export_summary, _out_path(cfg, args.out))
+    out_path = build_workbook(report, jobs, export_summary, _out_path(cfg, str(out) if out else None))
+    return out_path, report, export_summary
+
+
+def cmd_export(cfg: Config, args) -> int:
+    try:
+        out, report, export_summary = export_history(cfg, args.days, args.out)
+    except LookupError as exc:
+        log.error("%s", exc)
+        return 1
     _print_summary(report, export_summary, out)
     return 0
 
@@ -196,6 +213,23 @@ def cmd_stats(cfg: Config, args) -> int:
     return 0
 
 
+def cmd_ui(cfg: Config, args) -> int:
+    if importlib.util.find_spec("streamlit") is None:
+        print("the web UI needs extra packages: run `uv sync --extra ui`", file=sys.stderr)
+        return 2
+    app = Path(__file__).resolve().parent / "ui" / "app.py"
+    env = dict(os.environ, JOBBOT_PROJECT_DIR=str(cfg.project_dir))
+    if args.config:
+        env["JOBBOT_CONFIG"] = str(Path(args.config).resolve())
+    cmd = [sys.executable, "-m", "streamlit", "run", str(app), "--server.port", str(args.port)]
+    if args.no_browser:
+        cmd += ["--server.headless", "true"]
+    try:
+        return subprocess.call(cmd, cwd=cfg.project_dir, env=env)
+    except KeyboardInterrupt:
+        return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(asctime)s %(levelname)-7s %(name)s: %(message)s", datefmt="%H:%M:%S")
@@ -212,6 +246,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_export(cfg, args)
     if args.command == "stats":
         return cmd_stats(cfg, args)
+    if args.command == "ui":
+        return cmd_ui(cfg, args)
     return 2
 
 

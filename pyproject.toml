@@ -15,6 +15,13 @@ dependencies = [
     "python-dateutil>=2.9",
 ]
 
+[project.optional-dependencies]
+ui = [
+    "streamlit>=1.40",
+    "pandas>=2.2",
+    "ruamel.yaml>=0.18",
+]
+
 [project.scripts]
 jobbot = "jobbot.cli:main"
 

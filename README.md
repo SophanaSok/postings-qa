@@ -37,11 +37,31 @@ jobbot run     [--headed] [--source linkedin,indeed] [--keywords "QA Engineer,SD
 jobbot scrape  ...          # same as run, but no Excel (stores results + raw JSONL only)
 jobbot export  [--days 30] [--out FILE]   # rebuild the workbook from the SQLite history, no scraping
 jobbot stats                # last run summary
+jobbot ui      [--port 8501] [--no-browser]   # web dashboard (needs `uv sync --extra ui`)
 jobbot -v ...               # debug logging
 ```
 
 Outputs: `output/jobs-<date>.xlsx`, `data/jobs.db` (history), `data/raw-<run>.jsonl` (raw scrape),
 `data/debug/*.html` (saved only when a page could not be parsed).
+
+## Web UI
+
+A local Streamlit dashboard for reviewing results and tuning the bot without touching YAML by hand.
+
+```bash
+uv sync --extra ui          # streamlit, pandas, ruamel.yaml
+uv run jobbot ui            # http://localhost:8501  (--port N, --no-browser)
+```
+
+| Page | What it does |
+|---|---|
+| **Dashboard** | KPIs from the last run, the same charts as the Excel dashboard over a chosen history window, run history, download or rebuild the workbook |
+| **Jobs** | Filterable table of every stored listing (status, source, remote, new, text search), row detail with description and QA reason, CSV download |
+| **Settings & Run** | Forms for every `config.yaml` section (comments are preserved on save), a **QA preview** that re-runs the checks on stored jobs with your proposed filters before you save, a raw YAML editor, and a run panel |
+
+The run panel starts `jobbot run` / `jobbot scrape` as a subprocess with the current `config.yaml` plus any one-off
+overrides (`--headed`, `--source`, `--keywords`, `--location`, `--max-pages`, `--no-details`), streams its log into
+the page, and can stop it. Logs are kept in `data/runs/`. Headed runs open Chromium on the desktop running the UI.
 
 ## Configuration (`config.yaml`)
 
@@ -100,7 +120,8 @@ uv run pytest            # offline tests against saved HTML/JSON fixtures in tes
 
 Layout: `jobbot/sources/` (one adapter per site, pure `parse_*` functions separated from fetching),
 `jobbot/qa/` (checks + pipeline), `jobbot/storage.py` (SQLite), `jobbot/export/` (openpyxl workbook + charts),
-`jobbot/browser.py` (Playwright session, hardening, challenge detection), `jobbot/cli.py`.
+`jobbot/browser.py` (Playwright session, hardening, challenge detection), `jobbot/cli.py`,
+`jobbot/ui/` (Streamlit app: `app.py` entry, `views/` pages, `data.py` cached readers, `runner.py` subprocess control).
 
 ## Caveats
 

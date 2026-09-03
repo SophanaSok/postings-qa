@@ -152,10 +152,8 @@ class Storage:
         )
         self.conn.commit()
 
-    def last_run(self) -> RunSummary | None:
-        row = self.conn.execute("SELECT * FROM runs ORDER BY started_at DESC LIMIT 1").fetchone()
-        if not row:
-            return None
+    @staticmethod
+    def _run_from_row(row) -> RunSummary:
         payload = json.loads(row["summary_json"])
         return RunSummary(
             run_id=row["run_id"],
@@ -163,3 +161,12 @@ class Storage:
             finished_at=datetime.fromisoformat(row["finished_at"]) if row["finished_at"] else None,
             **payload,
         )
+
+    def list_runs(self, limit: int = 50) -> list[RunSummary]:
+        """Most recent runs first."""
+        rows = self.conn.execute("SELECT * FROM runs ORDER BY started_at DESC LIMIT ?", (int(limit),)).fetchall()
+        return [self._run_from_row(r) for r in rows]
+
+    def last_run(self) -> RunSummary | None:
+        runs = self.list_runs(limit=1)
+        return runs[0] if runs else None

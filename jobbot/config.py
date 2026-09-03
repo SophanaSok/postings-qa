@@ -1,4 +1,4 @@
-"""Configuration loading: YAML file + CLI overrides."""
+"""Configuration loading: YAML file + CLI overrides, plus comment-preserving write-back for the UI."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import yaml
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 EXAMPLE_CONFIG = PACKAGE_DIR.parent / "config.example.yaml"
+SOURCE_NAMES = ("linkedin", "indeed", "glassdoor")
 
 
 @dataclass
@@ -48,7 +49,7 @@ class QAConfig:
 @dataclass
 class Config:
     search: SearchConfig = field(default_factory=SearchConfig)
-    sources: dict[str, bool] = field(default_factory=lambda: {"linkedin": True, "indeed": True, "glassdoor": True})
+    sources: dict[str, bool] = field(default_factory=lambda: {name: True for name in SOURCE_NAMES})
     browser: BrowserConfig = field(default_factory=BrowserConfig)
     qa: QAConfig = field(default_factory=QAConfig)
     db_path: str = "data/jobs.db"
@@ -76,17 +77,17 @@ def _pick(d: dict[str, Any], cls, **overrides):
     return cls(**kwargs)
 
 
-def load_config(path: str | Path | None = None, project_dir: Path | None = None) -> Config:
+def config_path(path: str | Path | None = None, project_dir: Path | None = None) -> Path:
+    """The config file a run would read: the given path, else <project_dir>/config.yaml."""
     project_dir = project_dir or Path.cwd()
-    path = Path(path) if path else project_dir / "config.yaml"
-    raw: dict[str, Any] = {}
-    if path.exists():
-        raw = yaml.safe_load(path.read_text()) or {}
-    elif EXAMPLE_CONFIG.exists():
-        raw = yaml.safe_load(EXAMPLE_CONFIG.read_text()) or {}
+    return Path(path) if path else project_dir / "config.yaml"
 
+
+def config_from_raw(raw: dict[str, Any], project_dir: Path | None = None) -> Config:
+    """Build a Config from a parsed YAML mapping (the same rules as load_config)."""
+    raw = raw or {}
     sources_raw = raw.get("sources", {}) or {}
-    sources = {name: bool((sources_raw.get(name) or {}).get("enabled", True)) for name in ("linkedin", "indeed", "glassdoor")}
+    sources = {name: bool((sources_raw.get(name) or {}).get("enabled", True)) for name in SOURCE_NAMES}
     storage = raw.get("storage", {}) or {}
     export = raw.get("export", {}) or {}
     return Config(
@@ -97,8 +98,19 @@ def load_config(path: str | Path | None = None, project_dir: Path | None = None)
         db_path=storage.get("db_path", "data/jobs.db"),
         output_dir=export.get("output_dir", "output"),
         filename=export.get("filename", "jobs-{date}.xlsx"),
-        project_dir=project_dir,
+        project_dir=project_dir or Path.cwd(),
     )
+
+
+def load_config(path: str | Path | None = None, project_dir: Path | None = None) -> Config:
+    project_dir = project_dir or Path.cwd()
+    path = config_path(path, project_dir)
+    raw: dict[str, Any] = {}
+    if path.exists():
+        raw = yaml.safe_load(path.read_text()) or {}
+    elif EXAMPLE_CONFIG.exists():
+        raw = yaml.safe_load(EXAMPLE_CONFIG.read_text()) or {}
+    return config_from_raw(raw, project_dir)
 
 
 def write_example(dest: Path, force: bool = False) -> bool:
@@ -106,3 +118,40 @@ def write_example(dest: Path, force: bool = False) -> bool:
         return False
     shutil.copyfile(EXAMPLE_CONFIG, dest)
     return True
+
+
+# -- round-trip editing (used by the web UI; needs the `ui` extra for ruamel.yaml) ---------------
+
+def _yaml_rt():
+    from ruamel.yaml import YAML
+
+    y = YAML()
+    y.preserve_quotes = True
+    y.width = 4096
+    y.indent(mapping=2, sequence=4, offset=2)  # matches config.example.yaml's `key:\n    - item` layout
+    return y
+
+
+def load_raw(path: str | Path | None = None, project_dir: Path | None = None):
+    """Load config.yaml as a comment-preserving mapping (falls back to the example file)."""
+    path = config_path(path, project_dir)
+    src = path if path.exists() else EXAMPLE_CONFIG
+    return _yaml_rt().load(src.read_text()) or {}
+
+
+def save_raw(raw, path: str | Path) -> Path:
+    """Write a mapping from load_raw back to disk, keeping comments and key order."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w") as fh:
+        _yaml_rt().dump(raw, fh)
+    return path
+
+
+def flow_list(values) -> Any:
+    """A list that dumps inline (`[a, b]`) so short pairs like delay_seconds stay on one line."""
+    from ruamel.yaml.comments import CommentedSeq
+
+    seq = CommentedSeq(list(values))
+    seq.fa.set_flow_style()
+    return seq
