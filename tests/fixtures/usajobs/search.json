@@ -1,0 +1,60 @@
+{
+ "LanguageCode": "EN",
+ "SearchParameters": {},
+ "SearchResult": {
+  "SearchResultCount": 2,
+  "SearchResultCountAll": 137,
+  "SearchResultItems": [
+   {
+    "MatchedObjectId": "812345600",
+    "MatchedObjectDescriptor": {
+     "PositionID": "DE-26-12345-QA",
+     "PositionTitle": "IT Specialist (Quality Assurance)",
+     "PositionURI": "https://www.usajobs.gov:443/GetJob/ViewDetails/812345600",
+     "ApplyURI": ["https://www.usajobs.gov:443/GetJob/ViewDetails/812345600?PostingChannelID=RESTAPI"],
+     "PositionLocationDisplay": "Washington, District of Columbia",
+     "PositionLocation": [{"LocationName": "Washington, District of Columbia", "CountryCode": "United States", "CountrySubDivisionCode": "District of Columbia", "CityName": "Washington, District of Columbia"}],
+     "OrganizationName": "Department of the Treasury",
+     "DepartmentName": "Department of the Treasury",
+     "QualificationSummary": "You must have one year of specialized experience in software test automation.",
+     "PositionRemuneration": [{"MinimumRange": "99200", "MaximumRange": "153354", "RateIntervalCode": "PA", "Description": "Per Year"}],
+     "PositionStartDate": "2026-08-28T00:00:00.0000",
+     "PositionEndDate": "2026-09-11T23:59:59.9970",
+     "PublicationStartDate": "2026-08-28T00:00:00.0000",
+     "ApplicationCloseDate": "2026-09-11T23:59:59.9970",
+     "PositionSchedule": [{"Name": "Full-time", "Code": "1"}],
+     "PositionOfferingType": [{"Name": "Permanent", "Code": "15317"}],
+     "UserArea": {
+      "Details": {
+       "JobSummary": "Serves as a quality assurance specialist for enterprise applications.",
+       "MajorDuties": ["Designs and executes test plans.", "Automates regression suites."],
+       "Requirements": "US citizenship required.",
+       "RemoteIndicator": false,
+       "TeleworkEligible": true
+      },
+      "IsRadialSearch": false
+     }
+    },
+    "RelevanceRank": 0
+   },
+   {
+    "MatchedObjectId": "812345601",
+    "MatchedObjectDescriptor": {
+     "PositionID": "HHS-26-98765-DA",
+     "PositionTitle": "Data Analyst",
+     "PositionURI": "https://www.usajobs.gov:443/GetJob/ViewDetails/812345601",
+     "PositionLocationDisplay": "Anywhere in the U.S. (remote job)",
+     "OrganizationName": "Centers for Disease Control and Prevention",
+     "DepartmentName": "Department of Health and Human Services",
+     "QualificationSummary": "Experience with SQL and statistical analysis.",
+     "PositionRemuneration": [{"MinimumRange": "35.50", "MaximumRange": "52.10", "RateIntervalCode": "PH", "Description": "Per Hour"}],
+     "PublicationStartDate": "2026-09-01T00:00:00.0000",
+     "PositionSchedule": [{"Name": "Part-time", "Code": "2"}],
+     "UserArea": {"Details": {"JobSummary": "<p>Analyzes public health data.</p>", "RemoteIndicator": true}}
+    },
+    "RelevanceRank": 0
+   }
+  ],
+  "UserArea": {"NumberOfPages": "2", "IsRadialSearch": false}
+ }
+}

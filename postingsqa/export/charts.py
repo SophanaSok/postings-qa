@@ -12,7 +12,10 @@ from openpyxl.chart.series import DataPoint
 from openpyxl.worksheet.worksheet import Worksheet
 
 CATEGORICAL = ["2a78d6", "eb6834", "1baf7a", "eda100", "e87ba4", "008300", "4a3aa7", "e34948"]
-SOURCE_COLOR = {"linkedin": CATEGORICAL[0], "indeed": CATEGORICAL[1], "glassdoor": CATEGORICAL[2]}
+SOURCE_COLOR = {
+    "remotive": CATEGORICAL[0], "greenhouse": CATEGORICAL[1], "lever": CATEGORICAL[2], "usajobs": CATEGORICAL[3],
+    "adzuna": CATEGORICAL[4], "linkedin": CATEGORICAL[5], "indeed": CATEGORICAL[6], "glassdoor": CATEGORICAL[7],
+}
 PRIMARY = CATEGORICAL[0]
 NEUTRAL = "9a9891"
 STATUS_GOOD = "008300"

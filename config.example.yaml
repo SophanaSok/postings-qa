@@ -1,4 +1,4 @@
-# Job Posting Bot configuration. Copy to config.yaml (or run `pqa init`).
+# postings-qa configuration. Copy to config.yaml (or run `pqa init`).
 
 search:
   keywords:
@@ -12,9 +12,17 @@ search:
   max_details: 60           # cap on detail fetches per source per run
 
 sources:
-  linkedin: { enabled: true }
-  indeed: { enabled: true }
-  glassdoor: { enabled: true }
+  # --- Official / public APIs (default). No browser involved; each is one or a few requests per run.
+  remotive: { enabled: true }                       # remote-jobs feed; optional `category: qa` (see remotive.com/api/remote-jobs/categories)
+  greenhouse: { enabled: true, boards: [gitlab, stripe, airbnb] }   # Greenhouse board tokens: the slug in boards.greenhouse.io/<token>
+  lever: { enabled: true, sites: [spotify, palantir] }             # Lever site slugs: jobs.lever.co/<site>; or a map {slug: Display Name}
+  usajobs: { enabled: true }                        # needs env PQA_USAJOBS_KEY + PQA_USAJOBS_EMAIL (free: developer.usajobs.gov/apirequest)
+  adzuna: { enabled: false, country: us }           # needs env PQA_ADZUNA_APP_ID + PQA_ADZUNA_APP_KEY; 250 calls/day; requires a "Jobs by Adzuna" label
+  # --- Scrapers (opt-in). These read public pages that the sites' terms say not to scrape; read the
+  # "Responsible use" section of the README before enabling. Need `uv sync --extra scrapers`.
+  linkedin: { enabled: false }
+  indeed: { enabled: false }
+  glassdoor: { enabled: false }
 
 browser:
   headed: false             # `pqa run --headed` overrides for one run

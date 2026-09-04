@@ -1,0 +1,100 @@
+{
+ "00-warning": "Remotive main domain moved to remotive.com ! Please make your API calls on remotive.com/api/remote-jobs instead of remotive.io now ;) Legacy endpoint remotive.io/api/remote-jobs will be terminated in June 2022. Thank you!",
+ "0-legal-notice": "Legal warning - Hey, thanks for using Remotive's API, we appreciate it! Please note that API documentation and access is granted so that developers can share our jobs further. Please do not submit Remotive jobs to third Party websites, including but not limited to: Jooble, Neuvoo, Google Jobs, LinkedIn Jobs. Please link back to the URL found on Remotive AND mention Remotive as a source in order to Remotive to get traffic from your listing. If you don't do that, we'll terminate your API access, sorry! Jobs displayed are delayed by 24 hours, the goal being that jobs are attributed to Remotive on various platforms. Displaying our jobs in order to collect signups/email addresses to show a listing constitutes a breach of our terms of services. We offer a private, paid-for API, please email us at hello(at)remotive(dot)io for more information (starting budget is $5k/mo). Please find out terms of services on https://remotive.com/api-documentation. Please note that there is absolutely no need to request Remotive Job data too frequently. Typically, you only need to GET Remotive job data through this API a couple of times a day (we advise max. 4 times a day). Our data is not changing much faster than that anyway. Note that excessive requests will be blocked. Many thanks (Rodolphe & the Remotive team!)",
+ "job-count": 4,
+ "total-job-count": 17,
+ "jobs": [
+  {
+   "id": 2091105,
+   "url": "https://remotive.com/remote-jobs/all-others/content-reviewer-english-us-2091105",
+   "title": "Content Reviewer - English US",
+   "company_name": "TELUS Digital",
+   "company_logo": "https://remotive.com/job/2091105/logo",
+   "category": "All others",
+   "tags": [
+    "android",
+    "ios",
+    "social media",
+    "AI/ML"
+   ],
+   "job_type": "part_time",
+   "publication_date": "2026-08-21T05:54:39",
+   "candidate_required_location": "USA",
+   "salary": "$14/hour",
+   "description": "<p>Our global AI Community is a vibrant network of more than one million contributors from</p>\n<p>diverse backgrounds who help customers collect, enhance, train, translate, and localize</p>\n<p>content to build better AI models. Become part of our growing community and contribute</p>\n<p>to the development of innovative AI technologies used by some of the world's largest</p>\n<p>brands.</p>\n<p>We are looking for an independent, flexible, remote opportunity where you can help</p>\n<p>improve AI-powered search technology from the comfort of your home? If you're</p>\n<p>curious, internet-savvy, and enjoy evaluating online content, this freelance project could</p>\n<p>be a great fit.</p>\n<p>\u00a0</p>\n<div class=\"h3\">A Day in the Life of a Content Reviewer - US</div>\n<p>In this role, you will analyze and provide feedback on text, webpages, images, and other</p>\n<p>types of online content for leading search engines using a specialized online platform.</p>\n<p>By reviewing and rating search results for relevance and quality, you will help improve</p>\n<p>the overall search experience for millions of users around the world, including yourself.</p>\n<p>Join our global community and put your skills to wo",
+   "company_logo_url": "https://remotive.com/job/2091105/logo"
+  },
+  {
+   "id": 1919266,
+   "url": "https://remotive.com/remote-jobs/software-development/senior-independent-ai-engineer-architect-1919266",
+   "title": "Senior Independent AI Engineer / Architect",
+   "company_name": "A.Team",
+   "company_logo": "https://remotive.com/job/1919266/logo",
+   "category": "Software Development",
+   "tags": [
+    "go",
+    "UI/UX",
+    "wordpress",
+    "chat",
+    "apple",
+    "testing",
+    "catalyst"
+   ],
+   "job_type": "contract",
+   "publication_date": "2026-08-16T10:09:41",
+   "candidate_required_location": "Americas, Europe, Israel",
+   "salary": "$120 - $170 /hour",
+   "description": "<p class=\"my-2 [&amp;+p]:mt-4 [&amp;_strong:has(+br)]:inline-block [&amp;_strong:has(+br)]:pb-2\" style=\"border-color: oklch(0.3039 0.04 213.68 / 0.16); scrollbar-color: initial; scrollbar-width: initial; --tw-border-spacing-x: 0; --tw-border-spacing-y: 0; --tw-translate-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; --tw-skew-y: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-scroll-snap-strictness: proximity; --tw-ring-offset-width: 0px; --tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / .5); --tw-ring-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-shadow: 0 0 #0000; --tw-shadow-colored: 0 0 #0000;\">Senior Independent AI Engineer / Architect</p>\n<p><em>Remote | Americas, Europe, or Israel</em></p>\n<p>\u00a0</p>\n<p>Most AI engineers can find work.</p>\n<p>\u00a0</p>\n<p>Finding work worth doing is harder.</p>\n<p>\u00a0</p>\n<p>A.Team is an invite-only network of senior AI engineers, ML engineers, and AI architects building production AI systems for startups, enterprises, and global companies.</p>\n<p>\u00a0</p>\n<p>Since 2020, builders in the network have earned more than $200M working with companies including Lyft, Google X, HCA, Unilever, Sightful, D-ID, and others.</p>\n<p",
+   "company_logo_url": "https://remotive.com/job/1919266/logo"
+  },
+  {
+   "id": 1919265,
+   "url": "https://remotive.com/remote-jobs/software-development/senior-independent-software-developer-1919265",
+   "title": "Senior Independent Software Developer",
+   "company_name": "A.Team",
+   "company_logo": "https://remotive.com/job/1919265/logo",
+   "category": "Software Development",
+   "tags": [
+    "go",
+    "wordpress",
+    "chat",
+    "apple",
+    "testing",
+    "catalyst"
+   ],
+   "job_type": "contract",
+   "publication_date": "2026-08-16T10:09:34",
+   "candidate_required_location": "Americas, Europe, Israel",
+   "salary": "$90 - $150 /hour",
+   "description": "<p style=\"text-size-adjust: 100%; overflow-wrap: break-word;\"><em>You must be located in the Americas, Europe, or Israel to apply.<br></em><br><br><a href=\"https://build.a.team/remotivereferral\" rel=\"nofollow\">A\u00b7Team</a> is a VC-backed, stealth, application-only home on the internet for senior independent software builders to team up with hand-picked, high-growth companies on their next big thing.\u00a0</p>\n<p style=\"text-size-adjust: 100%; overflow-wrap: break-word;\">After talking with hundreds of independent engineers, designers, and product folks, we heard over and over that finding vetted, high-quality, consistent clients is hard, and projects are often too small to be rewarding. A\u00b7Team matches small teams of the most talented builders in the world with companies backed by a16z, YC, Softbank, General Catalyst, etc. on a contract basis for many of their most important initiatives. We quietly launched in May 2020, and have helped A\u00b7Teamers earn $85+ million since.</p>\n<p dir=\"ltr\" style=\"line-height: 1.38; margin-top: 12pt; margin-bottom: 12pt;\"><span style=\"font-variant-numeric: normal; font-variant-east-asian: normal; vertical-align: baseline;\"><em>As part of A\u00b7Team, you can expect:",
+   "company_logo_url": "https://remotive.com/job/1919265/logo"
+  },
+  {
+   "id": 2091068,
+   "url": "https://remotive.com/remote-jobs/marketing/head-of-marketing-communications-2091068",
+   "title": "Head of Marketing & Communications",
+   "company_name": "garden3d",
+   "company_logo": "https://remotive.com/job/2091068/logo",
+   "category": "Marketing",
+   "tags": [
+    "C",
+    "video",
+    "open source",
+    "AI/ML",
+    "Figma",
+    "project management",
+    "editing",
+    "IoT",
+    "testing",
+    "themes",
+    "mobile development"
+   ],
+   "job_type": "contract",
+   "publication_date": "2026-08-15T19:58:15",
+   "candidate_required_location": "Worldwide",
+   "salary": "$150k - $230k",
+   "description": "<p style=\"text-size-adjust: 100%; margin-bottom: 1rem; color: #212529;\"><span class=\"notion-enable-hover\" style=\"text-size-adjust: 100%;\">We are hiring a <span style=\"text-size-adjust: 100%; font-weight: bolder;\">Head of Marketing &amp; Communications</span> to tell the garden3d story across the internet, from wherever in the world you happen to be.</span></p>\n<p style=\"text-size-adjust: 100%; margin-bottom: 1rem; color: #212529;\"><span class=\"notion-enable-hover\" style=\"text-size-adjust: 100%;\">More details if you check our <a href=\"https://app.notion.com/p/garden3d/Head-of-Marketing-Communications-399131fea2c781afaa2bd634c3c77ec9?source=copy_link#870131fea2c782e5b0bd81a29bc64ff8\" rel=\"nofollow\" style=\"text-size-adjust: 100%; color: #f03f3f !important; text-decoration: underline !important;\">original job posting link</a></span></p>\n<div class=\"h2\" style=\"text-size-adjust: 100%; color: #212529; margin-bottom: 0.5rem; font-weight: 500;\"><span style=\"text-size-adjust: 100%; font-weight: bolder;\">About <a href=\"https://garden3d.net/\" rel=\"nofollow\" style=\"text-size-adjust: 100%; color: #f03f3f !important; text-decoration: underline !important;\">garden3d</a></span></div>\n<p style=\"text",
+   "company_logo_url": "https://remotive.com/job/2091068/logo"
+  }
+ ]
+}

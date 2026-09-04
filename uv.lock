@@ -835,12 +835,14 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "lxml" },
     { name = "openpyxl" },
-    { name = "playwright" },
     { name = "python-dateutil" },
     { name = "pyyaml" },
 ]
 
 [package.optional-dependencies]
+scrapers = [
+    { name = "playwright" },
+]
 ui = [
     { name = "pandas" },
     { name = "ruamel-yaml" },
@@ -858,13 +860,13 @@ requires-dist = [
     { name = "lxml", specifier = ">=5.0" },
     { name = "openpyxl", specifier = ">=3.1" },
     { name = "pandas", marker = "extra == 'ui'", specifier = ">=2.2" },
-    { name = "playwright", specifier = ">=1.47" },
+    { name = "playwright", marker = "extra == 'scrapers'", specifier = ">=1.47" },
     { name = "python-dateutil", specifier = ">=2.9" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "ruamel-yaml", marker = "extra == 'ui'", specifier = ">=0.18" },
     { name = "streamlit", marker = "extra == 'ui'", specifier = ">=1.40" },
 ]
-provides-extras = ["ui"]
+provides-extras = ["scrapers", "ui"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytest", specifier = ">=8.0" }]

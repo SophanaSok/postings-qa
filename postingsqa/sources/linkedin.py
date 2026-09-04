@@ -98,6 +98,9 @@ def parse_job_detail(html: str) -> dict:
 
 class LinkedInSource(BaseSource):
     name = "linkedin"
+    kind = "scraper"
+    uses_playwright = True
+    description = "LinkedIn public guest job search (undocumented endpoint; off by default)"
 
     def __init__(self, config, session):
         super().__init__(config, session)
@@ -107,7 +110,7 @@ class LinkedInSource(BaseSource):
     @property
     def api(self):
         if self._api is None:
-            self._api = self.session.api(base_url=BASE)
+            self._api = self.session.api(base_url=BASE, extra_headers={"Accept": "text/html,application/xhtml+xml,*/*;q=0.8"})
         return self._api
 
     def _get(self, path: str, params: dict | None = None) -> str | None:

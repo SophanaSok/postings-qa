@@ -5,6 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
+from postingsqa.sources import attributions
 from postingsqa.ui import data
 
 TABLE_COLUMNS = ["source", "title", "company", "location", "remote", "posted_at", "salary_min", "salary_max",
@@ -98,6 +99,9 @@ def render() -> None:
     )
 
     st.download_button("Download filtered rows as CSV", view.to_csv(index=False).encode(), file_name=f"jobs-{days}d.csv", mime="text/csv")
+    credits = attributions(view["source"].dropna().unique())
+    if credits:
+        st.caption("Listings via " + " · ".join(f"[{label}]({url})" for label, url in credits))
 
     selected = event.selection.rows if event and event.selection else []
     if selected:

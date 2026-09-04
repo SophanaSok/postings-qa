@@ -1,32 +1,12 @@
-import random
-from datetime import date, timedelta, datetime, timezone
+from datetime import datetime, timezone
 
 from openpyxl import load_workbook
 
 from postingsqa.config import QAConfig
 from postingsqa.export.excel import build_workbook
 from postingsqa.models import Job, RunSummary
+from postingsqa.demo import synthetic_jobs
 from postingsqa.qa.pipeline import run_qa
-
-
-def synthetic_jobs(n=40):
-    rng = random.Random(1)
-    titles = ["QA Engineer", "Data Analyst", "Automation Engineer", "SDET", "Senior QA Engineer", "Forklift Operator"]
-    companies = ["Acme", "Beta Inc", "Gamma LLC", "Delta Staffing", "Epsilon"]
-    jobs = []
-    for i in range(n):
-        src = rng.choice(["linkedin", "indeed", "glassdoor"])
-        host = {"linkedin": "www.linkedin.com/jobs/view", "indeed": "www.indeed.com/viewjob?jk=", "glassdoor": "www.glassdoor.com/job-listing"}[src]
-        lo = rng.choice([None, 60000, 90000, 120000, 40])
-        jobs.append(Job(
-            source=src, source_id=str(i), title=rng.choice(titles), company=rng.choice(companies),
-            location=rng.choice(["Remote", "Austin, TX", "New York, NY", "Berlin"]),
-            url=f"https://{host}{i}", posted_at=date.today() - timedelta(days=rng.randint(0, 40)),
-            salary_min=lo, salary_max=(lo * 1.3 if lo else None), salary_period="hour" if lo == 40 else "year",
-            description="Lorem ipsum " * rng.choice([5, 40]), is_new=rng.random() < 0.5,
-            first_seen=datetime.now(timezone.utc),
-        ))
-    return jobs
 
 
 def test_workbook_has_sheets_and_charts(tmp_path):
@@ -49,4 +29,7 @@ def test_workbook_has_sheets_and_charts(tmp_path):
     assert rej.cell(row=2, column=rej.max_column).value
     assert wb["Raw"].max_row == len(jobs) + 1
     qa = wb["QA Summary"]
-    assert qa["F5"].value == "blocked"  # indeed row
+    status = {qa.cell(row=r, column=1).value: qa.cell(row=r, column=6).value for r in range(4, 4 + 12) if qa.cell(row=r, column=1).value}
+    assert status["Indeed"] == "blocked" and status["Glassdoor"] == "error: timeout"
+    assert status["Remotive"] == "ok"
+    assert wb["Dashboard"]["A3"].value.startswith("Listings via Remotive")

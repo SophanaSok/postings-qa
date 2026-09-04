@@ -13,6 +13,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.worksheet.worksheet import Worksheet
 
+from postingsqa.config import SOURCE_NAMES
 from postingsqa.export import charts
 from postingsqa.models import Job, QAResult, RunSummary
 from postingsqa.qa.checks import annualize
@@ -157,6 +158,12 @@ def _write_dashboard(ws: Worksheet, data: Worksheet, kept: list[Job], report: QA
     ws["A1"].font = TITLE_FONT
     ws["A2"] = f"Generated {datetime.now():%Y-%m-%d %H:%M}"
     ws["A2"].font = KPI_LABEL_FONT
+    from postingsqa.sources import attribution_text
+
+    credit = attribution_text(report.per_source)
+    if credit:
+        ws["A3"] = credit
+        ws["A3"].font = KPI_LABEL_FONT
 
     new_count = sum(1 for j in kept if j.is_new)
     blocked = ", ".join(summary.blocked_sources) if summary and summary.blocked_sources else "none"
@@ -179,11 +186,11 @@ def _write_dashboard(ws: Worksheet, data: Worksheet, kept: list[Job], report: QA
 
     # 1. Jobs by source (identity → fixed categorical color per source)
     by_source = Counter(j.source for j in kept)
-    order = [s for s in ("linkedin", "indeed", "glassdoor") if s in by_source]
+    order = [s for s in SOURCE_NAMES if s in by_source] + sorted(s for s in by_source if s not in SOURCE_NAMES)
     rows = [(s.capitalize(), by_source[s]) for s in order]
     if rows:
         rng = tables.write(("Source", "Jobs"), rows)
-        ws.add_chart(charts.bar_chart(data, "Jobs passing QA by source", *rng, point_colors=[charts.SOURCE_COLOR[s] for s in order], x_title="Source"), next(anchors))
+        ws.add_chart(charts.bar_chart(data, "Jobs passing QA by source", *rng, point_colors=[charts.SOURCE_COLOR.get(s, charts.NEUTRAL) for s in order], x_title="Source"), next(anchors))
 
     # 2. Top companies (magnitude → single hue, sorted)
     top = Counter(j.company for j in kept if j.company).most_common(10)
@@ -237,7 +244,8 @@ def _write_qa_summary(ws: Worksheet, report: QAReport, summary: RunSummary | Non
     ws["A1"].font = TITLE_FONT
     _write_header(ws, ["Source", "Scraped", "Kept", "Rejected", "Pass rate", "Status"], row=3)
     r = 4
-    for src in ("linkedin", "indeed", "glassdoor"):
+    present = set(report.per_source) | (set(summary.blocked_sources) | set(summary.errors) if summary else set())
+    for src in [s for s in SOURCE_NAMES if s in present] + sorted(present - set(SOURCE_NAMES)):
         stats = report.per_source.get(src)
         blocked = summary is not None and src in summary.blocked_sources
         error = summary.errors.get(src) if summary else None

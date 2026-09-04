@@ -1,23 +1,28 @@
-"""Playwright session management: persistent contexts, light hardening, challenge detection."""
+"""Playwright session for the opt-in scrapers: persistent per-site contexts and challenge detection.
+
+Only imported when a scraper is enabled. Playwright is an optional dependency (`uv sync --extra scrapers`).
+There is deliberately no fingerprint spoofing here: the browser presents itself as what it is, and a bot
+challenge stops the source (see BrowserSource).
+"""
 
 from __future__ import annotations
 
 import logging
-import random
 import re
 import time
 from pathlib import Path
-
-from playwright.sync_api import APIRequestContext, BrowserContext, Page, Playwright, sync_playwright
+from typing import TYPE_CHECKING
 
 from postingsqa.config import Config
+from postingsqa.errors import SourceBlocked  # noqa: F401  (re-exported for adapters)
+from postingsqa.http import USER_AGENT, pause
+
+if TYPE_CHECKING:
+    from playwright.sync_api import APIRequestContext, BrowserContext, Page, Playwright
 
 log = logging.getLogger(__name__)
 
-
-class SourceBlocked(Exception):
-    """Raised when a site presents a bot challenge / auth wall that we cannot pass unattended."""
-
+INSTALL_HINT = "Playwright is not installed. Run `uv sync --extra scrapers` and `uv run playwright install chromium`."
 
 CHALLENGE_PATTERNS = re.compile(
     r"just a moment|cf-chl|challenge-platform|verify you are human|additional verification required|"
@@ -47,7 +52,7 @@ def is_challenge(page: Page) -> bool:
 
 
 class BrowserSession:
-    """Owns one Playwright instance; hands out per-source persistent contexts and API contexts."""
+    """Owns one Playwright instance; hands out per-source persistent contexts and API request contexts."""
 
     def __init__(self, config: Config, headed: bool | None = None):
         self.config = config
@@ -55,11 +60,14 @@ class BrowserSession:
         self._pw: Playwright | None = None
         self._contexts: list[BrowserContext] = []
         self._requests: list[APIRequestContext] = []
-        self._ua: str | None = None
 
     # -- lifecycle --------------------------------------------------------
 
     def __enter__(self) -> "BrowserSession":
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError as exc:
+            raise RuntimeError(INSTALL_HINT) from exc
         self._pw = sync_playwright().start()
         return self
 
@@ -82,42 +90,29 @@ class BrowserSession:
         assert self._pw is not None, "use BrowserSession as a context manager"
         return self._pw
 
-    @property
-    def user_agent(self) -> str:
-        """A desktop Chrome UA matching the bundled Chromium major version (so UA and fingerprint agree)."""
-        if self._ua is None:
-            browser = self.pw.chromium.launch(headless=True)
-            major = browser.version.split(".")[0]
-            browser.close()
-            self._ua = f"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{major}.0.0.0 Safari/537.36"
-        return self._ua
-
     # -- factories --------------------------------------------------------
 
     def context(self, source: str) -> BrowserContext:
+        """A persistent Chromium context per source (cookies survive between runs, like a normal browser)."""
         profile = self.config.resolve(self.config.browser.profile_dir) / source
         profile.mkdir(parents=True, exist_ok=True)
         ctx = self.pw.chromium.launch_persistent_context(
             user_data_dir=str(profile),
             headless=not self.headed,
-            args=["--disable-blink-features=AutomationControlled"],
-            user_agent=self.user_agent,
             viewport={"width": 1366, "height": 768},
             locale="en-US",
             timezone_id=_local_timezone(),
-            ignore_default_args=["--enable-automation"],
         )
         ctx.set_default_timeout(self.config.browser.timeout_seconds * 1000)
-        ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
         self._contexts.append(ctx)
         return ctx
 
-    def api(self, base_url: str | None = None) -> APIRequestContext:
-        """Browser-less HTTP client (used for LinkedIn's guest endpoints)."""
+    def api(self, base_url: str | None = None, extra_headers: dict[str, str] | None = None) -> APIRequestContext:
+        """Browser-less HTTP client identified by the project's own User-Agent."""
         req = self.pw.request.new_context(
             base_url=base_url,
-            user_agent=self.user_agent,
-            extra_http_headers={"Accept-Language": "en-US,en;q=0.9", "Accept": "text/html,application/xhtml+xml,*/*;q=0.8"},
+            user_agent=USER_AGENT,
+            extra_http_headers={"Accept-Language": "en-US,en;q=0.9", **(extra_headers or {})},
             timeout=self.config.browser.timeout_seconds * 1000,
         )
         self._requests.append(req)
@@ -126,15 +121,14 @@ class BrowserSession:
     # -- helpers ----------------------------------------------------------
 
     def delay(self, factor: float = 1.0) -> None:
-        lo, hi = self.config.browser.delay_seconds
-        time.sleep(random.uniform(lo, hi) * factor)
+        pause(self.config.browser.delay_seconds, factor)
 
     def ensure_not_blocked(self, page: Page, source: str, wait_seconds: float = 120) -> None:
         """Raise SourceBlocked on a challenge page; in headed mode, give the user time to solve it first."""
         if not is_challenge(page):
             return
         if not self.headed:
-            raise SourceBlocked(f"{source}: bot challenge detected (re-run with --headed to solve it once)")
+            raise SourceBlocked(f"{source}: bot challenge detected; this source is stopped for the run")
         log.warning("%s: challenge page shown — solve it in the browser window (waiting up to %ss)", source, int(wait_seconds))
         deadline = time.time() + wait_seconds
         while time.time() < deadline:

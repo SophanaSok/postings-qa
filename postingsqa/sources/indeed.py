@@ -149,6 +149,7 @@ def parse_job_detail(html: str) -> dict:
 
 class IndeedSource(BrowserSource):
     name = "indeed"
+    description = "Indeed search pages via headless Chromium (off by default)"
     wait_selectors = "#mosaic-provider-jobcards, div.job_seen_beacon, #jobDescriptionText, .jobsearch-NoResult-messageContainer"
 
     def search(self, keyword: str, location: str, max_pages: int) -> Iterator[Job]:

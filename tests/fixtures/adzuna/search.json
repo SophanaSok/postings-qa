@@ -1,0 +1,37 @@
+{
+ "count": 2,
+ "mean": 101234.5,
+ "results": [
+  {
+   "id": "5123456789",
+   "title": "<strong>QA</strong> Automation Engineer",
+   "description": "We are looking for a <strong>QA</strong> Automation Engineer to own our regression suite. You will design test plans, build Playwright and pytest frameworks, and partner with data engineering on pipeline validation. Hybrid role based in Austin ...",
+   "created": "2026-09-02T14:03:11Z",
+   "redirect_url": "https://www.adzuna.com/land/ad/5123456789?se=abc&utm_medium=api&v=1",
+   "adref": "eyJhbGciOiJIUzI1NiJ9.abc.def",
+   "company": {"display_name": "Acme Robotics", "canonical_name": "acme-robotics"},
+   "location": {"display_name": "Austin, Travis County", "area": ["US", "Texas", "Travis County", "Austin"]},
+   "category": {"tag": "it-jobs", "label": "IT Jobs"},
+   "salary_min": 95000.0,
+   "salary_max": 120000.0,
+   "salary_is_predicted": "0",
+   "contract_time": "full_time",
+   "contract_type": "permanent",
+   "latitude": 30.26,
+   "longitude": -97.74
+  },
+  {
+   "id": "5123456790",
+   "title": "Data Analyst",
+   "description": "Analyze sales data and build dashboards.",
+   "created": "2026-08-30T09:00:00Z",
+   "redirect_url": "https://www.adzuna.com/land/ad/5123456790?se=xyz",
+   "company": {"display_name": "Beta Retail"},
+   "location": {"display_name": "Remote", "area": ["US"]},
+   "salary_min": 68000.0,
+   "salary_max": 68000.0,
+   "salary_is_predicted": "1",
+   "contract_time": "part_time"
+  }
+ ]
+}

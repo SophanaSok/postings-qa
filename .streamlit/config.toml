@@ -1,0 +1,13 @@
+# Theme matched to the chart palette in postingsqa/export/charts.py (CATEGORICAL[0] = #2a78d6).
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f4f2"
+textColor = "#1f2933"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = false

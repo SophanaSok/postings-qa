@@ -1,13 +1,23 @@
 [project]
 name = "postings-qa"
 version = "0.1.0"
-description = "Playwright bot that scrapes LinkedIn, Indeed and Glassdoor job listings, runs data-QA checks, and exports an Excel dashboard with charts."
+description = "Job-postings pipeline: pulls listings from public job APIs, runs rule-based data-QA checks with auditable rejection reasons, keeps a deduplicated SQLite history, and exports Excel and Streamlit dashboards."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Sophana Sok" }]
+keywords = ["data-quality", "job-postings", "etl", "streamlit", "openpyxl", "greenhouse", "lever", "remotive", "usajobs"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
 dependencies = [
-    "playwright>=1.47",
     "openpyxl>=3.1",
     "pyyaml>=6.0",
     "beautifulsoup4>=4.12",
@@ -16,11 +26,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+scrapers = [
+    "playwright>=1.47",
+]
 ui = [
     "streamlit>=1.40",
     "pandas>=2.2",
     "ruamel.yaml>=0.18",
 ]
+
+[project.urls]
+Repository = "https://github.com/SophanaSok/postings-qa"
 
 [project.scripts]
 pqa = "postingsqa.cli:main"

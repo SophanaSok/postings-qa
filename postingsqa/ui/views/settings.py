@@ -10,8 +10,9 @@ import pandas as pd
 import streamlit as st
 import yaml
 
-from postingsqa.config import EXAMPLE_CONFIG, SOURCE_NAMES, config_from_raw, flow_list, load_raw, save_raw
+from postingsqa.config import EXAMPLE_CONFIG, SOURCE_DEFAULTS, SOURCE_NAMES, config_from_raw, flow_list, load_raw, save_raw
 from postingsqa.qa.pipeline import QAReport
+from postingsqa.sources import all_sources
 from postingsqa.ui import data
 from postingsqa.ui.runner import get_runner
 
@@ -103,12 +104,36 @@ def _search_form(raw, path: Path, before: dict) -> None:
 def _sources_browser_form(raw, path: Path, before: dict) -> None:
     src = _section(raw, "sources")
     b = _section(raw, "browser")
+    registry = all_sources()
+    api_names = [n for n in SOURCE_NAMES if registry[n].kind == "api"]
+    scraper_names = [n for n in SOURCE_NAMES if registry[n].kind == "scraper"]
+
+    def _entry(name: str) -> dict:
+        e = src.get(name)
+        if isinstance(e, bool):
+            return {"enabled": e}
+        return dict(e or {})
+
+    def _toggle_row(names: list[str]) -> None:
+        for col, name in zip(st.columns(max(len(names), 1)), names):
+            entry = _entry(name)
+            enabled[name] = col.toggle(name, bool(entry.get("enabled", SOURCE_DEFAULTS[name])), help=registry[name].description)
+            opts = {k: v for k, v in entry.items() if k != "enabled"}
+            if opts:
+                col.caption(" · ".join(f"{k}: {v}" for k, v in opts.items()))
+
     with st.form("sources_form", border=True):
-        st.markdown("#### Sources & browser")
-        cols = st.columns(len(SOURCE_NAMES))
-        enabled = {}
-        for col, name in zip(cols, SOURCE_NAMES):
-            enabled[name] = col.toggle(name, bool((src.get(name) or {}).get("enabled", True)))
+        st.markdown("#### Sources")
+        enabled: dict[str, bool] = {}
+        st.caption("Official / public APIs. Per-source options (boards, sites, country) and API keys are edited in the Raw YAML "
+                   "panel below or via the `PQA_*` environment variables named in each source's help.")
+        _toggle_row(api_names)
+        st.caption("Scrapers, off by default. Read **Responsible use** in the README before enabling one.")
+        _toggle_row(scraper_names)
+        if any(_entry(n).get("enabled", SOURCE_DEFAULTS[n]) for n in scraper_names):
+            st.warning("A scraper is enabled. These read pages that the sites' terms prohibit scraping; keep runs personal and "
+                       "low-volume, and expect a bot challenge to stop the source. Needs `uv sync --extra scrapers`.", icon="⚠️")
+        st.markdown("#### Browser (scrapers only)")
         c1, c2, c3 = st.columns(3)
         headed = c1.toggle("Headed browser by default", bool(b.get("headed", False)),
                            help="Show the Chromium window. Useful to clear a Cloudflare challenge by hand once.")
@@ -121,8 +146,8 @@ def _sources_browser_form(raw, path: Path, before: dict) -> None:
                 st.error("Enable at least one source.")
                 return
             for name, on in enabled.items():
-                if src.get(name) is None:
-                    src[name] = {}
+                if not isinstance(src.get(name), dict):
+                    src[name] = {"enabled": bool(src.get(name))} if isinstance(src.get(name), bool) else {}
                 src[name]["enabled"] = bool(on)
             b["headed"] = bool(headed)
             b["delay_seconds"] = flow_list([float(delay[0]), float(delay[1])])
@@ -277,6 +302,8 @@ def _run_panel(days: int) -> None:
         headed = c2.toggle("Headed browser", value=cfg.browser.headed, disabled=running, key="run_headed",
                            help="Opens a visible Chromium on this desktop so you can clear a bot challenge by hand.")
         sources = c3.multiselect("Sources for this run", list(SOURCE_NAMES), default=cfg.enabled_sources, disabled=running, key="run_sources")
+        if any(all_sources()[s].kind == "scraper" for s in sources):
+            c3.caption("⚠️ includes a scraper: personal, low-volume use only (see README, Responsible use)")
         with st.expander("One-off overrides (config.yaml is not changed)"):
             o1, o2, o3 = st.columns([2, 1, 1])
             kw = o1.text_input("Keywords (comma-separated)", disabled=running, key="run_keywords", placeholder=", ".join(cfg.search.keywords))

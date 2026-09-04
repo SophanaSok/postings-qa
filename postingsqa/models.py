@@ -8,8 +8,6 @@ from dataclasses import asdict, dataclass, field, fields
 from datetime import date, datetime, timezone
 from typing import Any
 
-SOURCES = ("linkedin", "indeed", "glassdoor")
-
 _WS = re.compile(r"\s+")
 _NON_ALNUM = re.compile(r"[^a-z0-9 ]+")
 

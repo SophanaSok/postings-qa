@@ -15,7 +15,14 @@ from postingsqa.models import Job, normalize
 
 Check = Callable[[Job, QAConfig], str | tuple[str, str] | None]
 
+# Hosts a source's posting URL must belong to. An empty tuple skips the host check: Greenhouse boards may
+# live on employer domains, and USAJobs/Adzuna hand out redirect URLs to arbitrary employer sites.
 SOURCE_HOSTS = {
+    "remotive": ("remotive.com",),
+    "greenhouse": (),
+    "lever": ("lever.co",),
+    "usajobs": ("usajobs.gov",),
+    "adzuna": (),
     "linkedin": ("linkedin.com",),
     "indeed": ("indeed.com",),
     "glassdoor": ("glassdoor.com",),

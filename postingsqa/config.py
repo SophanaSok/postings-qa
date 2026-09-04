@@ -11,7 +11,20 @@ import yaml
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 EXAMPLE_CONFIG = PACKAGE_DIR.parent / "config.example.yaml"
-SOURCE_NAMES = ("linkedin", "indeed", "glassdoor")
+# Enabled-by-default state per source. API sources are on; Adzuna is off because its terms require a
+# "Jobs by Adzuna" label and cap usage at 250 calls/day; the three scrapers are off (see README,
+# "Responsible use"). Kept in sync with the adapter registry by tests/test_sources_registry.py.
+SOURCE_DEFAULTS: dict[str, bool] = {
+    "remotive": True,
+    "greenhouse": True,
+    "lever": True,
+    "usajobs": True,
+    "adzuna": False,
+    "linkedin": False,
+    "indeed": False,
+    "glassdoor": False,
+}
+SOURCE_NAMES = tuple(SOURCE_DEFAULTS)
 
 
 @dataclass
@@ -49,7 +62,8 @@ class QAConfig:
 @dataclass
 class Config:
     search: SearchConfig = field(default_factory=SearchConfig)
-    sources: dict[str, bool] = field(default_factory=lambda: {name: True for name in SOURCE_NAMES})
+    sources: dict[str, bool] = field(default_factory=lambda: dict(SOURCE_DEFAULTS))
+    source_options: dict[str, dict[str, Any]] = field(default_factory=lambda: {name: {} for name in SOURCE_NAMES})
     browser: BrowserConfig = field(default_factory=BrowserConfig)
     qa: QAConfig = field(default_factory=QAConfig)
     db_path: str = "data/jobs.db"
@@ -87,12 +101,21 @@ def config_from_raw(raw: dict[str, Any], project_dir: Path | None = None) -> Con
     """Build a Config from a parsed YAML mapping (the same rules as load_config)."""
     raw = raw or {}
     sources_raw = raw.get("sources", {}) or {}
-    sources = {name: bool((sources_raw.get(name) or {}).get("enabled", True)) for name in SOURCE_NAMES}
+    sources: dict[str, bool] = {}
+    options: dict[str, dict[str, Any]] = {}
+    for name in SOURCE_NAMES:
+        entry = sources_raw.get(name)
+        if isinstance(entry, bool):  # allow the shorthand `remotive: true`
+            entry = {"enabled": entry}
+        entry = dict(entry or {})
+        sources[name] = bool(entry.pop("enabled", SOURCE_DEFAULTS[name]))
+        options[name] = entry
     storage = raw.get("storage", {}) or {}
     export = raw.get("export", {}) or {}
     return Config(
         search=_pick(raw.get("search", {}) or {}, SearchConfig),
         sources=sources,
+        source_options=options,
         browser=_pick(raw.get("browser", {}) or {}, BrowserConfig),
         qa=_pick(raw.get("qa", {}) or {}, QAConfig),
         db_path=storage.get("db_path", "data/jobs.db"),

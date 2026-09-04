@@ -166,6 +166,7 @@ def parse_job_detail(html: str) -> dict:
 
 class GlassdoorSource(BrowserSource):
     name = "glassdoor"
+    description = "Glassdoor search pages via headless Chromium (off by default)"
     wait_selectors = "li[data-test=jobListing], li[data-jobid], [data-test=jobDescriptionContent], [class*=JobDetails_jobDescription]"
     DETAIL_SELECTOR = "[data-test=jobDescriptionContent], [class*=JobDetails_jobDescription], #JobDescriptionContainer"
 

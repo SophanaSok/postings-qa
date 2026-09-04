@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from postingsqa.cli import export_history
+from postingsqa.sources import attributions
 from postingsqa.ui import data
 
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -68,8 +69,10 @@ def render() -> None:
         st.warning(f"No jobs seen in the last {days} days.")
         return
 
+    credits = attributions(df["source"].dropna().unique())
     st.caption(f"{len(df)} jobs seen in the last {days} days: {int((df['qa_status'] == 'kept').sum())} kept, "
-               f"{int((df['qa_status'] == 'rejected').sum())} rejected, {int(df['is_new'].sum())} first seen in the latest run.")
+               f"{int((df['qa_status'] == 'rejected').sum())} rejected, {int(df['is_new'].sum())} first seen in the latest run."
+               + ("  \nListings via " + " · ".join(f"[{label}]({url})" for label, url in credits) if credits else ""))
 
     # -- Charts -----------------------------------------------------------------------------------
     c1, c2 = st.columns(2)

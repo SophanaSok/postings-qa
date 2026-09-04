@@ -1,4 +1,4 @@
-"""Command-line interface: pqa init | run | scrape | export | stats."""
+"""Command-line interface: pqa init | run | scrape | export | stats | demo | ui."""
 
 from __future__ import annotations
 
@@ -12,9 +12,10 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from contextlib import nullcontext
+
 from postingsqa import __version__
-from postingsqa.browser import BrowserSession
-from postingsqa.config import Config, load_config, write_example
+from postingsqa.config import SOURCE_NAMES, Config, load_config, write_example
 from postingsqa.export.excel import build_workbook
 from postingsqa.models import Job, RunSummary
 from postingsqa.qa.pipeline import QAReport, run_qa
@@ -35,7 +36,7 @@ def _parser() -> argparse.ArgumentParser:
 
     def scrape_args(sp):
         sp.add_argument("--headed", action="store_true", help="show the browser so you can clear bot challenges")
-        sp.add_argument("--source", help="comma-separated subset: linkedin,indeed,glassdoor")
+        sp.add_argument("--source", help="comma-separated subset of: " + ",".join(SOURCE_NAMES))
         sp.add_argument("--keywords", help="comma-separated search keywords (overrides config)")
         sp.add_argument("--location", help="search location (overrides config)")
         sp.add_argument("--max-pages", type=int)
@@ -54,9 +55,15 @@ def _parser() -> argparse.ArgumentParser:
 
     sub.add_parser("stats", help="print the last run summary")
 
+    demo = sub.add_parser("demo", help="seed a synthetic history + workbook so the dashboards have data (no network)")
+    demo.add_argument("--jobs", type=int, default=120, help="number of synthetic listings (default 120)")
+    demo.add_argument("--seed", type=int, default=1)
+    demo.add_argument("--reset", action="store_true", help="delete the history database first")
+
     ui = sub.add_parser("ui", help="open the web dashboard (needs `uv sync --extra ui`)")
     ui.add_argument("--port", type=int, default=8501)
     ui.add_argument("--no-browser", action="store_true", help="don't open a browser tab automatically")
+    ui.add_argument("--demo", action="store_true", help="seed demo data first if the history is empty")
     return p
 
 
@@ -70,16 +77,26 @@ def _apply_overrides(cfg: Config, args) -> None:
     if getattr(args, "no_details", False):
         cfg.search.fetch_descriptions = False
     if getattr(args, "source", None):
-        wanted = {s.strip() for s in args.source.split(",")}
+        wanted = {s.strip() for s in args.source.split(",") if s.strip()}
+        unknown = sorted(wanted - set(cfg.sources))
+        if unknown:
+            raise ValueError(f"unknown source(s): {', '.join(unknown)}; available: {', '.join(cfg.sources)}")
         cfg.sources = {name: (name in wanted) for name in cfg.sources}
 
 
 def scrape_all(cfg: Config, headed: bool) -> tuple[list[Job], RunSummary]:
     summary = RunSummary(run_id=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"), started_at=datetime.now(timezone.utc))
     all_jobs: list[Job] = []
-    with BrowserSession(cfg, headed=headed) as session:
-        for name in cfg.enabled_sources:
-            source = get_source(name)(cfg, session)
+    classes = {name: get_source(name) for name in cfg.enabled_sources}
+    if any(cls.uses_playwright for cls in classes.values()):
+        from postingsqa.browser import BrowserSession
+
+        session_cm = BrowserSession(cfg, headed=headed)
+    else:
+        session_cm = nullcontext(None)  # API-only run: Playwright is never imported
+    with session_cm as session:
+        for name, cls in classes.items():
+            source = cls(cfg, session)
             try:
                 jobs = source.run()
                 if source.blocked_reason:
@@ -148,11 +165,19 @@ def cmd_init(cfg: Config, args) -> int:
 
 
 def cmd_run(cfg: Config, args, export: bool) -> int:
-    _apply_overrides(cfg, args)
-    if not cfg.enabled_sources:
-        log.error("no sources enabled")
+    try:
+        _apply_overrides(cfg, args)
+    except ValueError as exc:
+        log.error("%s", exc)
         return 2
-    jobs, summary = scrape_all(cfg, headed=args.headed)
+    if not cfg.enabled_sources:
+        log.error("no sources enabled (see the `sources:` block in config.yaml)")
+        return 2
+    try:
+        jobs, summary = scrape_all(cfg, headed=args.headed)
+    except RuntimeError as exc:  # e.g. Playwright missing for an enabled scraper
+        log.error("%s", exc)
+        return 2
     report = qa_and_store(cfg, jobs, summary)
     out = None
     if export:
@@ -213,10 +238,44 @@ def cmd_stats(cfg: Config, args) -> int:
     return 0
 
 
+def cmd_demo(cfg: Config, args) -> int:
+    from postingsqa.demo import demo_summary, synthetic_jobs
+
+    db = cfg.resolve(cfg.db_path)
+    if getattr(args, "reset", False) and db.exists():
+        db.unlink()
+        log.info("deleted %s", db)
+    jobs = synthetic_jobs(args.jobs, args.seed)
+    now = datetime.now(timezone.utc)
+    # A "previous run" that saw the first half, so New vs previously-seen and run history mean something.
+    with Storage(db) as store:
+        prev = RunSummary(run_id=f"demo-{(now - timedelta(days=1)):%Y%m%dT%H%M%SZ}", started_at=now - timedelta(days=1),
+                          finished_at=now - timedelta(days=1, minutes=-2))
+        half = jobs[: len(jobs) // 2]
+        prev.new_count = store.mark_seen(half)
+        prev.scraped_by_source = {s: sum(1 for j in half if j.source == s) for s in {j.source for j in half}}
+        prev.kept_by_source = dict(prev.scraped_by_source)
+        store.save_run(prev)
+    summary = demo_summary(f"demo-{now:%Y%m%dT%H%M%SZ}", now)
+    report = qa_and_store(cfg, jobs, summary)
+    out = build_workbook(report, jobs, summary, _out_path(cfg, None))
+    _print_summary(report, summary, out)
+    print("  synthetic data: nothing above is a real posting. Explore it with `pqa ui`.")
+    return 0
+
+
 def cmd_ui(cfg: Config, args) -> int:
     if importlib.util.find_spec("streamlit") is None:
         print("the web UI needs extra packages: run `uv sync --extra ui`", file=sys.stderr)
         return 2
+    if getattr(args, "demo", False):
+        db = cfg.resolve(cfg.db_path)
+        empty = True
+        if db.exists():
+            with Storage(db) as store:
+                empty = store.count() == 0
+        if empty:
+            cmd_demo(cfg, argparse.Namespace(jobs=120, seed=1, reset=False))
     app = Path(__file__).resolve().parent / "ui" / "app.py"
     env = dict(os.environ, PQA_PROJECT_DIR=str(cfg.project_dir))
     if args.config:
@@ -246,6 +305,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_export(cfg, args)
     if args.command == "stats":
         return cmd_stats(cfg, args)
+    if args.command == "demo":
+        return cmd_demo(cfg, args)
     if args.command == "ui":
         return cmd_ui(cfg, args)
     return 2
