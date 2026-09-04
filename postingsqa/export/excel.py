@@ -8,14 +8,14 @@ from pathlib import Path
 
 from openpyxl import Workbook
 from openpyxl.formatting.rule import FormulaRule
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.styles import Alignment, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.worksheet.worksheet import Worksheet
 
 from postingsqa.config import SOURCE_NAMES
 from postingsqa.export import charts
-from postingsqa.models import Job, QAResult, RunSummary
+from postingsqa.models import Job, RunSummary
 from postingsqa.qa.checks import annualize
 from postingsqa.qa.pipeline import QAReport
 
@@ -154,6 +154,11 @@ def _postings_per_day(jobs: list[Job], days: int = 30) -> list[tuple[str, float]
 
 def _write_dashboard(ws: Worksheet, data: Worksheet, kept: list[Job], report: QAReport, summary: RunSummary | None) -> None:
     ws.sheet_view.showGridLines = False
+    # Print / PDF export: the whole dashboard on one landscape page.
+    ws.page_setup.orientation = "landscape"
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 1
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
     ws["A1"] = "Job Postings Dashboard"
     ws["A1"].font = TITLE_FONT
     ws["A2"] = f"Generated {datetime.now():%Y-%m-%d %H:%M}"

@@ -28,7 +28,7 @@ with st.sidebar:
     if last and last.run_id.startswith("demo-"):
         st.info("Showing **demo data** seeded by `pqa demo`. Run the bot or `pqa demo --reset` to replace it.", icon="🧪")
     st.caption(
-        f"**Project** `{data.project_dir()}`  \n"
+        f"**Project** `{data.project_dir().name}`  \n"
         f"**Config** `{data.cfg_path().name}`  \n"
         f"**History** {data.job_count(cfg)} jobs in `{cfg.db_path}`  \n"
         + (f"**Last run** {last.started_at.astimezone():%Y-%m-%d %H:%M}" if last else "**Last run** none yet")

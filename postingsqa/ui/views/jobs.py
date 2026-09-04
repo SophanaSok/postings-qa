@@ -8,8 +8,25 @@ import streamlit as st
 from postingsqa.sources import attributions
 from postingsqa.ui import data
 
-TABLE_COLUMNS = ["source", "title", "company", "location", "remote", "posted_at", "salary_min", "salary_max",
-                 "salary_period", "is_new", "first_seen", "url", "qa_status", "qa_reason"]
+TABLE_COLUMNS = ["source", "title", "company", "location", "remote", "posted_at", "salary", "is_new", "first_seen", "url",
+                 "qa_status", "qa_reason"]
+PERIOD_LABEL = {"year": "yr", "hour": "hr", "month": "mo", "week": "wk", "day": "day"}
+
+
+def _salary_text(row: pd.Series) -> str:
+    """'$95,000 – $120,000 / yr', '$28 – $35 / hr', '' when unknown. Numeric columns stay in the CSV export."""
+    lo, hi = row.get("salary_min"), row.get("salary_max")
+    if pd.isna(lo) and pd.isna(hi):
+        return ""
+    cur = row.get("salary_currency") if isinstance(row.get("salary_currency"), str) else "USD"
+    sym = {"USD": "$", "EUR": "€", "GBP": "£", "CAD": "CA$", "AUD": "A$"}.get(cur, f"{cur} ")
+    fmt = lambda v: f"{sym}{v:,.0f}" if v >= 1000 else f"{sym}{v:,.2f}".rstrip("0").rstrip(".")
+    lo_s = fmt(lo) if not pd.isna(lo) else None
+    hi_s = fmt(hi) if not pd.isna(hi) else None
+    amount = lo_s if hi_s is None or hi_s == lo_s else hi_s if lo_s is None else f"{lo_s} – {hi_s}"
+    period = row.get("salary_period") if isinstance(row.get("salary_period"), str) else None
+    est = " (est.)" if bool(row.get("salary_is_estimate")) else ""
+    return f"{amount} / {PERIOD_LABEL.get(period, period)}{est}" if period else f"{amount}{est}"
 
 
 def _filters(df: pd.DataFrame) -> pd.DataFrame:
@@ -42,12 +59,12 @@ def _detail(row: pd.Series) -> None:
     st.markdown(f"### {row['title'] or '(no title)'}")
     st.markdown(f"**{row['company'] or '?'}** · {row['location'] or 'location unknown'} · via {row['source']}"
                 + (f" · [open posting]({row['url']})" if isinstance(row["url"], str) else ""))
-    facts = st.columns(4)
-    facts[0].metric("Posted", str(row["posted_at"]) if pd.notna(row["posted_at"]) else (row["posted_raw"] or "?"))
-    salary = row["salary_raw"] if isinstance(row["salary_raw"], str) else "—"
-    facts[1].metric("Salary", salary)
-    facts[2].metric("Type", row["employment_type"] or "—")
-    facts[3].metric("Seniority", row["seniority"] or "—")
+    posted = str(row["posted_at"]) if pd.notna(row["posted_at"]) else (row["posted_raw"] if isinstance(row["posted_raw"], str) else "unknown")
+    facts = [("Posted", posted), ("Salary", _salary_text(row) or "not listed"),
+             ("Type", row["employment_type"] if isinstance(row["employment_type"], str) else "—"),
+             ("Seniority", row["seniority"] if isinstance(row["seniority"], str) else "—")]
+    # Streamlit renders `$…$` as LaTeX, so escape dollar signs in salary text.
+    st.markdown(" · ".join(f"**{k}** {str(v).replace('$', chr(92) + '$')}" for k, v in facts))
     if row["qa_status"] == "rejected":
         st.error(f"Rejected: {row['qa_reason']}")
     elif row["qa_status"] == "kept":
@@ -74,6 +91,7 @@ def render() -> None:
     if view.empty:
         return
 
+    view = view.assign(salary=view.apply(_salary_text, axis=1))
     cols = [c for c in TABLE_COLUMNS if c in view.columns]
     if st.session_state.get("f_status") == "kept":
         cols = [c for c in cols if c not in ("qa_status", "qa_reason")]
@@ -88,8 +106,7 @@ def render() -> None:
         key="jobs_table",
         column_config={
             "url": st.column_config.LinkColumn("url", display_text="open"),
-            "salary_min": st.column_config.NumberColumn("salary min", format="dollar"),
-            "salary_max": st.column_config.NumberColumn("salary max", format="dollar"),
+            "salary": st.column_config.TextColumn("salary", width="medium"),
             "posted_at": st.column_config.DateColumn("posted"),
             "first_seen": st.column_config.DatetimeColumn("first seen", format="YYYY-MM-DD"),
             "remote": st.column_config.CheckboxColumn("remote"),

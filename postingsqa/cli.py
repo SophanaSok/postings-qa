@@ -147,7 +147,7 @@ def _print_summary(report: QAReport, summary: RunSummary, out: Path | None) -> N
         kept = summary.kept_by_source.get(src, 0)
         print(f"  {src:10s} scraped {n:4d}  kept {kept:4d}  {status}")
     if summary.blocked_sources:
-        print(f"  blocked: {', '.join(summary.blocked_sources)} — re-run with --headed to clear the challenge once; the browser profile keeps the cookies.")
+        print(f"  blocked: {', '.join(summary.blocked_sources)} — stopped at a bot challenge; nothing was retried. `--headed` lets you solve it by hand if you must.")
     if report.rejection_counts:
         top = ", ".join(f"{k} {v}" for k, v in sorted(report.rejection_counts.items(), key=lambda kv: -kv[1]))
         print(f"  rejections: {top}")
@@ -257,6 +257,7 @@ def cmd_demo(cfg: Config, args) -> int:
         prev.kept_by_source = dict(prev.scraped_by_source)
         store.save_run(prev)
     summary = demo_summary(f"demo-{now:%Y%m%dT%H%M%SZ}", now)
+    summary.scraped_by_source = {s: sum(1 for j in jobs if j.source == s) for s in sorted({j.source for j in jobs})}
     report = qa_and_store(cfg, jobs, summary)
     out = build_workbook(report, jobs, summary, _out_path(cfg, None))
     _print_summary(report, summary, out)

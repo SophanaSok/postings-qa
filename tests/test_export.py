@@ -4,7 +4,7 @@ from openpyxl import load_workbook
 
 from postingsqa.config import QAConfig
 from postingsqa.export.excel import build_workbook
-from postingsqa.models import Job, RunSummary
+from postingsqa.models import RunSummary
 from postingsqa.demo import synthetic_jobs
 from postingsqa.qa.pipeline import run_qa
 

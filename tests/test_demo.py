@@ -27,6 +27,7 @@ def test_demo_command_seeds_history_and_workbook(tmp_path, monkeypatch, capsys):
     with Storage(cfg.resolve(cfg.db_path)) as store:
         runs = store.list_runs()
         assert len(runs) == 2 and runs[0].run_id.startswith("demo-") and runs[0].blocked_sources == ["glassdoor"]
+        assert runs[0].scraped > 60 and runs[0].kept > 0 and runs[0].rejected > 0 and runs[0].scraped == runs[0].kept + runs[0].rejected
         assert 0 < runs[0].new_count < store.count()  # half were "seen" by the previous run
     assert list((tmp_path / "output").glob("*.xlsx"))
     # --reset starts over: one fresh pair of runs, not four
