@@ -23,7 +23,7 @@ def _bar(df: pd.DataFrame, x: str, y: str, *, color: str | None = None, scale: d
     cat = alt.X if not horizontal else alt.Y
     val = alt.Y if not horizontal else alt.X
     chart = alt.Chart(df).mark_bar(cornerRadiusEnd=2).encode(
-        cat(f"{x}:N", sort=sort, title=None, axis=alt.Axis(labelAngle=0 if not horizontal else 0, labelLimit=180)),
+        cat(f"{x}:N", sort=sort, title=None, axis=alt.Axis(labelAngle=0, labelLimit=180)),
         val(f"{y}:Q", title=None, axis=alt.Axis(tickMinStep=1, format="d")),
         color=enc_color,
         tooltip=[c for c in df.columns],

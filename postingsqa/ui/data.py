@@ -93,7 +93,7 @@ def load_jobs_df(path: str, stamp: int, days: int) -> pd.DataFrame:
     for col in df.columns:
         if df[col].dtype == object:
             df[col] = df[col].astype("string")  # NULL -> <NA>, which renders blank instead of "None"
-    df["remote"] = df["remote"].map({1: True, 0: False, 1.0: True, 0.0: False})
+    df["remote"] = df["remote"].map({1: True, 0: False})
     df["salary_is_estimate"] = df["salary_is_estimate"].fillna(0).astype(bool)
     df["posted_at"] = pd.to_datetime(df["posted_at"], errors="coerce").dt.date
     for col in ("first_seen", "last_seen"):

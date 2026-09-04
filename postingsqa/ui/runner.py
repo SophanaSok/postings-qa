@@ -84,7 +84,7 @@ class RunManager:
         except subprocess.TimeoutExpired:
             os.killpg(pgid, signal.SIGKILL)
             self.proc.wait()
-        self.returncode  # closes the log handle
+        _ = self.returncode  # closes the log handle
 
     # -- log --------------------------------------------------------------
 
