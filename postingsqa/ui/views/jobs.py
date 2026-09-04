@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from jobbot.ui import data
+from postingsqa.ui import data
 
 TABLE_COLUMNS = ["source", "title", "company", "location", "remote", "posted_at", "salary_min", "salary_max",
                  "salary_period", "is_new", "first_seen", "url", "qa_status", "qa_reason"]

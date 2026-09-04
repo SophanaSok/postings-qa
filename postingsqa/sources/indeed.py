@@ -10,9 +10,9 @@ from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
 
-from jobbot.models import Job
-from jobbot.parsing import clean, parse_relative_date, parse_salary
-from jobbot.sources.base import BrowserSource
+from postingsqa.models import Job
+from postingsqa.parsing import clean, parse_relative_date, parse_salary
+from postingsqa.sources.base import BrowserSource
 
 BASE = "https://www.indeed.com"
 PAGE_SIZE = 10

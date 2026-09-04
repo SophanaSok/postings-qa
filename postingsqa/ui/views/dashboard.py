@@ -6,8 +6,8 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from jobbot.cli import export_history
-from jobbot.ui import data
+from postingsqa.cli import export_history
+from postingsqa.ui import data
 
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -62,7 +62,7 @@ def render() -> None:
                 for src, err in last.errors.items():
                     st.write(f"**{src}** — {err}")
     else:
-        st.info("No runs recorded yet. Start one from **Settings & Run**, or run `jobbot run` in a terminal.")
+        st.info("No runs recorded yet. Start one from **Settings & Run**, or run `pqa run` in a terminal.")
 
     if df.empty:
         st.warning(f"No jobs seen in the last {days} days.")
@@ -123,7 +123,7 @@ def render() -> None:
         else:
             st.caption(f"No workbook in `{cfg.output_dir}/` yet.")
     with w2:
-        if st.button(f"Rebuild workbook from the last {days} days of history", help="Same as `jobbot export --days N`: no scraping."):
+        if st.button(f"Rebuild workbook from the last {days} days of history", help="Same as `pqa export --days N`: no scraping."):
             try:
                 out, report, _ = export_history(cfg, days)
             except LookupError as exc:

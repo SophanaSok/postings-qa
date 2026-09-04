@@ -9,13 +9,13 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from jobbot.config import Config, config_from_raw, config_path, load_config
-from jobbot.export.charts import CATEGORICAL, NEUTRAL, PRIMARY, SOURCE_COLOR, STATUS_BAD, STATUS_GOOD
-from jobbot.export.excel import SALARY_BUCKETS
-from jobbot.models import RunSummary
-from jobbot.qa.checks import annualize
-from jobbot.qa.pipeline import QAReport, run_qa
-from jobbot.storage import Storage
+from postingsqa.config import Config, config_from_raw, config_path, load_config
+from postingsqa.export.charts import CATEGORICAL, NEUTRAL, PRIMARY, SOURCE_COLOR, STATUS_BAD, STATUS_GOOD
+from postingsqa.export.excel import SALARY_BUCKETS
+from postingsqa.models import RunSummary
+from postingsqa.qa.checks import annualize
+from postingsqa.qa.pipeline import QAReport, run_qa
+from postingsqa.storage import Storage
 
 # -- palette (shared with the Excel dashboard; openpyxl wants bare hex, Altair wants '#') ----------
 
@@ -33,11 +33,11 @@ CATEGORICAL_COLORS = [hexcolor(c) for c in CATEGORICAL]
 # -- project / config -------------------------------------------------------------------------
 
 def project_dir() -> Path:
-    return Path(os.environ.get("JOBBOT_PROJECT_DIR") or Path.cwd()).resolve()
+    return Path(os.environ.get("PQA_PROJECT_DIR") or Path.cwd()).resolve()
 
 
 def cfg_path() -> Path:
-    return config_path(os.environ.get("JOBBOT_CONFIG"), project_dir())
+    return config_path(os.environ.get("PQA_CONFIG"), project_dir())
 
 
 def get_config() -> Config:

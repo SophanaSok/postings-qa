@@ -8,10 +8,10 @@ from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
 
-from jobbot.browser import SourceBlocked, is_challenge_html
-from jobbot.models import Job
-from jobbot.parsing import clean, parse_iso_date, parse_relative_date, parse_salary
-from jobbot.sources.base import BaseSource
+from postingsqa.browser import SourceBlocked, is_challenge_html
+from postingsqa.models import Job
+from postingsqa.parsing import clean, parse_iso_date, parse_relative_date, parse_salary
+from postingsqa.sources.base import BaseSource
 
 BASE = "https://www.linkedin.com"
 SEARCH_PATH = "/jobs-guest/jobs/api/seeMoreJobPostings/search"

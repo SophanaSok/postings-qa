@@ -1,6 +1,6 @@
 from datetime import date
 
-from jobbot.parsing import parse_relative_date, parse_salary
+from postingsqa.parsing import parse_relative_date, parse_salary
 
 
 def test_parse_salary_variants():

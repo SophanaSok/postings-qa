@@ -5,7 +5,7 @@ A Playwright-based bot that scrapes job listings from **LinkedIn**, **Indeed** a
 an **Excel dashboard with charts** for analysis.
 
 ```
-jobbot run                # scrape → QA → output/jobs-YYYY-MM-DD.xlsx
+pqa run                # scrape → QA → output/jobs-YYYY-MM-DD.xlsx
 ```
 
 ## What you get
@@ -25,20 +25,20 @@ Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 ```bash
 uv sync
 uv run playwright install chromium
-uv run jobbot init          # writes config.yaml from config.example.yaml
-uv run jobbot run
+uv run pqa init          # writes config.yaml from config.example.yaml
+uv run pqa run
 ```
 
 ## Usage
 
 ```
-jobbot run     [--headed] [--source linkedin,indeed] [--keywords "QA Engineer,SDET"] [--location "United States"]
+pqa run     [--headed] [--source linkedin,indeed] [--keywords "QA Engineer,SDET"] [--location "United States"]
                [--max-pages N] [--no-details] [--out FILE]
-jobbot scrape  ...          # same as run, but no Excel (stores results + raw JSONL only)
-jobbot export  [--days 30] [--out FILE]   # rebuild the workbook from the SQLite history, no scraping
-jobbot stats                # last run summary
-jobbot ui      [--port 8501] [--no-browser]   # web dashboard (needs `uv sync --extra ui`)
-jobbot -v ...               # debug logging
+pqa scrape  ...          # same as run, but no Excel (stores results + raw JSONL only)
+pqa export  [--days 30] [--out FILE]   # rebuild the workbook from the SQLite history, no scraping
+pqa stats                # last run summary
+pqa ui      [--port 8501] [--no-browser]   # web dashboard (needs `uv sync --extra ui`)
+pqa -v ...               # debug logging
 ```
 
 Outputs: `output/jobs-<date>.xlsx`, `data/jobs.db` (history), `data/raw-<run>.jsonl` (raw scrape),
@@ -50,7 +50,7 @@ A local Streamlit dashboard for reviewing results and tuning the bot without tou
 
 ```bash
 uv sync --extra ui          # streamlit, pandas, ruamel.yaml
-uv run jobbot ui            # http://localhost:8501  (--port N, --no-browser)
+uv run pqa ui            # http://localhost:8501  (--port N, --no-browser)
 ```
 
 | Page | What it does |
@@ -59,7 +59,7 @@ uv run jobbot ui            # http://localhost:8501  (--port N, --no-browser)
 | **Jobs** | Filterable table of every stored listing (status, source, remote, new, text search), row detail with description and QA reason, CSV download |
 | **Settings & Run** | Forms for every `config.yaml` section (comments are preserved on save), a **QA preview** that re-runs the checks on stored jobs with your proposed filters before you save, a raw YAML editor, and a run panel |
 
-The run panel starts `jobbot run` / `jobbot scrape` as a subprocess with the current `config.yaml` plus any one-off
+The run panel starts `pqa run` / `pqa scrape` as a subprocess with the current `config.yaml` plus any one-off
 overrides (`--headed`, `--source`, `--keywords`, `--location`, `--max-pages`, `--no-details`), streams its log into
 the page, and can stop it. Logs are kept in `data/runs/`. Headed runs open Chromium on the desktop running the UI.
 
@@ -108,7 +108,7 @@ Indeed and Glassdoor use Cloudflare bot management. The bot:
 3. if still challenged, marks the source **blocked**, keeps whatever was already collected, and continues
    with the other sources. The run summary and the QA Summary sheet show which sources were blocked.
 
-Run `jobbot run --headed` to get a visible browser: solve the challenge by hand once, and the persistent profile
+Run `pqa run --headed` to get a visible browser: solve the challenge by hand once, and the persistent profile
 keeps the clearance cookie for later headless runs. No credentials are ever used; the bot only reads pages that
 are public to logged-out visitors.
 
@@ -118,10 +118,10 @@ are public to logged-out visitors.
 uv run pytest            # offline tests against saved HTML/JSON fixtures in tests/fixtures/
 ```
 
-Layout: `jobbot/sources/` (one adapter per site, pure `parse_*` functions separated from fetching),
-`jobbot/qa/` (checks + pipeline), `jobbot/storage.py` (SQLite), `jobbot/export/` (openpyxl workbook + charts),
-`jobbot/browser.py` (Playwright session, hardening, challenge detection), `jobbot/cli.py`,
-`jobbot/ui/` (Streamlit app: `app.py` entry, `views/` pages, `data.py` cached readers, `runner.py` subprocess control).
+Layout: `postingsqa/sources/` (one adapter per site, pure `parse_*` functions separated from fetching),
+`postingsqa/qa/` (checks + pipeline), `postingsqa/storage.py` (SQLite), `postingsqa/export/` (openpyxl workbook + charts),
+`postingsqa/browser.py` (Playwright session, hardening, challenge detection), `postingsqa/cli.py`,
+`postingsqa/ui/` (Streamlit app: `app.py` entry, `views/` pages, `data.py` cached readers, `runner.py` subprocess control).
 
 ## Caveats
 

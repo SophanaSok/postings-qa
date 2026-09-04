@@ -10,8 +10,8 @@ from datetime import date
 from typing import Callable
 from urllib.parse import urlparse
 
-from jobbot.config import QAConfig
-from jobbot.models import Job, normalize
+from postingsqa.config import QAConfig
+from postingsqa.models import Job, normalize
 
 Check = Callable[[Job, QAConfig], str | tuple[str, str] | None]
 

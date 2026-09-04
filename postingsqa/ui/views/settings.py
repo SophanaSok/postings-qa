@@ -10,10 +10,10 @@ import pandas as pd
 import streamlit as st
 import yaml
 
-from jobbot.config import EXAMPLE_CONFIG, SOURCE_NAMES, config_from_raw, flow_list, load_raw, save_raw
-from jobbot.qa.pipeline import QAReport
-from jobbot.ui import data
-from jobbot.ui.runner import get_runner
+from postingsqa.config import EXAMPLE_CONFIG, SOURCE_NAMES, config_from_raw, flow_list, load_raw, save_raw
+from postingsqa.qa.pipeline import QAReport
+from postingsqa.ui import data
+from postingsqa.ui.runner import get_runner
 
 
 # -- helpers ----------------------------------------------------------------------------------

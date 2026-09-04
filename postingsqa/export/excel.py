@@ -13,10 +13,10 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.worksheet.worksheet import Worksheet
 
-from jobbot.export import charts
-from jobbot.models import Job, QAResult, RunSummary
-from jobbot.qa.checks import annualize
-from jobbot.qa.pipeline import QAReport
+from postingsqa.export import charts
+from postingsqa.models import Job, QAResult, RunSummary
+from postingsqa.qa.checks import annualize
+from postingsqa.qa.pipeline import QAReport
 
 HEADER_FILL = PatternFill("solid", fgColor="1f2933")
 HEADER_FONT = Font(bold=True, color="ffffff")
@@ -255,7 +255,7 @@ def _write_qa_summary(ws: Worksheet, report: QAReport, summary: RunSummary | Non
     r += 1
     _write_header(ws, ["Check", "Rejections", "Flags (soft warnings)"], row=r)
     r += 1
-    from jobbot.qa.checks import CHECKS
+    from postingsqa.qa.checks import CHECKS
 
     for name in ["duplicate"] + [n for n, _ in CHECKS]:
         ws.cell(row=r, column=1, value=name)

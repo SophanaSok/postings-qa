@@ -1,9 +1,9 @@
 from datetime import date, timedelta
 
-from jobbot.config import QAConfig
-from jobbot.models import Job
-from jobbot.qa import checks
-from jobbot.qa.pipeline import run_qa
+from postingsqa.config import QAConfig
+from postingsqa.models import Job
+from postingsqa.qa import checks
+from postingsqa.qa.pipeline import run_qa
 
 
 def mk(**kw) -> Job:

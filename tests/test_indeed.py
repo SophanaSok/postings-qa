@@ -1,8 +1,8 @@
 from datetime import date
 from pathlib import Path
 
-from jobbot.browser import is_challenge_html
-from jobbot.sources.indeed import parse_job_detail, parse_search_page
+from postingsqa.browser import is_challenge_html
+from postingsqa.sources.indeed import parse_job_detail, parse_search_page
 
 FIX = Path(__file__).parent / "fixtures" / "indeed"
 

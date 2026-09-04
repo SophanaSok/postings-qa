@@ -3,10 +3,10 @@ from datetime import date, timedelta, datetime, timezone
 
 from openpyxl import load_workbook
 
-from jobbot.config import QAConfig
-from jobbot.export.excel import build_workbook
-from jobbot.models import Job, RunSummary
-from jobbot.qa.pipeline import run_qa
+from postingsqa.config import QAConfig
+from postingsqa.export.excel import build_workbook
+from postingsqa.models import Job, RunSummary
+from postingsqa.qa.pipeline import run_qa
 
 
 def synthetic_jobs(n=40):

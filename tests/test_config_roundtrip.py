@@ -1,6 +1,6 @@
 import yaml
 
-from jobbot.config import EXAMPLE_CONFIG, config_from_raw, flow_list, load_config, load_raw, save_raw
+from postingsqa.config import EXAMPLE_CONFIG, config_from_raw, flow_list, load_config, load_raw, save_raw
 
 
 def test_config_from_raw_matches_load_config(tmp_path):

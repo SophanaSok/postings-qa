@@ -1,4 +1,4 @@
-# Job Posting Bot configuration. Copy to config.yaml (or run `jobbot init`).
+# Job Posting Bot configuration. Copy to config.yaml (or run `pqa init`).
 
 search:
   keywords:
@@ -17,7 +17,7 @@ sources:
   glassdoor: { enabled: true }
 
 browser:
-  headed: false             # `jobbot run --headed` overrides for one run
+  headed: false             # `pqa run --headed` overrides for one run
   profile_dir: ".browser-profile"
   delay_seconds: [1.5, 4.0] # random pause between page loads
   timeout_seconds: 30

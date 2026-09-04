@@ -1,4 +1,4 @@
-"""Command-line interface: jobbot init | run | scrape | export | stats."""
+"""Command-line interface: pqa init | run | scrape | export | stats."""
 
 from __future__ import annotations
 
@@ -12,23 +12,23 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from jobbot import __version__
-from jobbot.browser import BrowserSession
-from jobbot.config import Config, load_config, write_example
-from jobbot.export.excel import build_workbook
-from jobbot.models import Job, RunSummary
-from jobbot.qa.pipeline import QAReport, run_qa
-from jobbot.sources import get_source
-from jobbot.storage import Storage
+from postingsqa import __version__
+from postingsqa.browser import BrowserSession
+from postingsqa.config import Config, load_config, write_example
+from postingsqa.export.excel import build_workbook
+from postingsqa.models import Job, RunSummary
+from postingsqa.qa.pipeline import QAReport, run_qa
+from postingsqa.sources import get_source
+from postingsqa.storage import Storage
 
-log = logging.getLogger("jobbot")
+log = logging.getLogger("postingsqa")
 
 
 def _parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="jobbot", description="Scrape job boards, QA the listings, export an Excel dashboard.")
+    p = argparse.ArgumentParser(prog="pqa", description="Scrape job boards, QA the listings, export an Excel dashboard.")
     p.add_argument("-c", "--config", help="path to config.yaml (default: ./config.yaml, else built-in defaults)")
     p.add_argument("-v", "--verbose", action="store_true", help="debug logging")
-    p.add_argument("--version", action="version", version=f"jobbot {__version__}")
+    p.add_argument("--version", action="version", version=f"pqa {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
 
     sub.add_parser("init", help="write config.yaml from the bundled example").add_argument("--force", action="store_true")
@@ -171,7 +171,7 @@ def export_history(cfg: Config, days: int, out: str | Path | None = None) -> tup
         jobs = store.load_jobs(since_run=since)
         summary = store.last_run()
     if not jobs:
-        raise LookupError(f"no stored jobs in the last {days} days; run `jobbot run` first")
+        raise LookupError(f"no stored jobs in the last {days} days; run `pqa run` first")
     report = run_qa(jobs, cfg.qa)
     # counts describe the exported set, not the last scrape; keep the last run's blocked/error status
     export_summary = RunSummary(
@@ -218,9 +218,9 @@ def cmd_ui(cfg: Config, args) -> int:
         print("the web UI needs extra packages: run `uv sync --extra ui`", file=sys.stderr)
         return 2
     app = Path(__file__).resolve().parent / "ui" / "app.py"
-    env = dict(os.environ, JOBBOT_PROJECT_DIR=str(cfg.project_dir))
+    env = dict(os.environ, PQA_PROJECT_DIR=str(cfg.project_dir))
     if args.config:
-        env["JOBBOT_CONFIG"] = str(Path(args.config).resolve())
+        env["PQA_CONFIG"] = str(Path(args.config).resolve())
     cmd = [sys.executable, "-m", "streamlit", "run", str(app), "--server.port", str(args.port)]
     if args.no_browser:
         cmd += ["--server.headless", "true"]

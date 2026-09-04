@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 from pathlib import Path
 
-from jobbot.browser import is_challenge_html
-from jobbot.sources.glassdoor import build_search_url, parse_cards_dom, parse_graph_payload
+from postingsqa.browser import is_challenge_html
+from postingsqa.sources.glassdoor import build_search_url, parse_cards_dom, parse_graph_payload
 
 FIX = Path(__file__).parent / "fixtures" / "glassdoor"
 

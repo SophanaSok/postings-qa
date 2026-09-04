@@ -1,9 +1,9 @@
 from datetime import date, datetime, timezone
 
-from jobbot.models import Job, RunSummary
-from jobbot.qa.pipeline import run_qa
-from jobbot.config import QAConfig
-from jobbot.storage import Storage
+from postingsqa.models import Job, RunSummary
+from postingsqa.qa.pipeline import run_qa
+from postingsqa.config import QAConfig
+from postingsqa.storage import Storage
 
 
 def test_mark_seen_tracks_new_across_runs(tmp_path):

@@ -6,14 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from jobbot.cli import export_history
-from jobbot.config import EXAMPLE_CONFIG, load_config
-from jobbot.models import Job, RunSummary
-from jobbot.qa.pipeline import run_qa
-from jobbot.storage import Storage
+from postingsqa.cli import export_history
+from postingsqa.config import EXAMPLE_CONFIG, load_config
+from postingsqa.models import Job, RunSummary
+from postingsqa.qa.pipeline import run_qa
+from postingsqa.storage import Storage
 
 pytest.importorskip("streamlit")
-from jobbot.ui.runner import RunManager  # noqa: E402
+from postingsqa.ui.runner import RunManager  # noqa: E402
 
 
 def _wait(runner: RunManager, seconds: float = 15) -> int:
@@ -26,11 +26,11 @@ def _wait(runner: RunManager, seconds: float = 15) -> int:
 
 def test_run_manager_logs_and_exit_code(tmp_path):
     runner = RunManager(tmp_path)
-    log = runner.start(["--version"])  # python -u -m jobbot.cli --version: exits 0 quickly
+    log = runner.start(["--version"])  # python -u -m postingsqa.cli --version: exits 0 quickly
     assert log.parent == tmp_path / "data" / "runs"
     assert _wait(runner) == 0
     text = log.read_text()
-    assert text.startswith("$ ") and "jobbot 0." in text
+    assert text.startswith("$ ") and "pqa 0." in text
     assert runner.tail(1) == text.splitlines(keepends=True)[-1]
     assert runner.past_logs() == [log]
 
@@ -85,14 +85,14 @@ def test_export_history_builds_workbook(tmp_path):
 def _app(view: str):
     from streamlit.testing.v1 import AppTest
 
-    return AppTest.from_string(f"import streamlit as st\nfrom jobbot.ui.views import {view}\n{view}.render()\n", default_timeout=60)
+    return AppTest.from_string(f"import streamlit as st\nfrom postingsqa.ui.views import {view}\n{view}.render()\n", default_timeout=60)
 
 
 @pytest.mark.parametrize("view", ["dashboard", "jobs", "settings"])
 def test_views_render_without_exceptions(tmp_path, monkeypatch, view):
     _seed_project(tmp_path)
-    monkeypatch.setenv("JOBBOT_PROJECT_DIR", str(tmp_path))
-    monkeypatch.delenv("JOBBOT_CONFIG", raising=False)
+    monkeypatch.setenv("PQA_PROJECT_DIR", str(tmp_path))
+    monkeypatch.delenv("PQA_CONFIG", raising=False)
     at = _app(view).run()
     assert not at.exception, [e.value for e in at.exception]
     assert at.title[0].value.startswith({"dashboard": "Job Postings", "jobs": "Jobs", "settings": "Settings"}[view])
@@ -104,8 +104,8 @@ def test_views_render_without_exceptions(tmp_path, monkeypatch, view):
 
 def test_settings_save_changes_config(tmp_path, monkeypatch):
     _seed_project(tmp_path)
-    monkeypatch.setenv("JOBBOT_PROJECT_DIR", str(tmp_path))
-    monkeypatch.delenv("JOBBOT_CONFIG", raising=False)
+    monkeypatch.setenv("PQA_PROJECT_DIR", str(tmp_path))
+    monkeypatch.delenv("PQA_CONFIG", raising=False)
     at = _app("settings").run()
     pages = [n for n in at.number_input if n.label.startswith("Result pages")][0]
     pages.set_value(1)

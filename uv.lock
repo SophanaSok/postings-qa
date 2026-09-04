@@ -380,48 +380,6 @@ wheels = [
 ]
 
 [[package]]
-name = "job-posting-bot"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "lxml" },
-    { name = "openpyxl" },
-    { name = "playwright" },
-    { name = "python-dateutil" },
-    { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-ui = [
-    { name = "pandas" },
-    { name = "ruamel-yaml" },
-    { name = "streamlit" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4", specifier = ">=4.12" },
-    { name = "lxml", specifier = ">=5.0" },
-    { name = "openpyxl", specifier = ">=3.1" },
-    { name = "pandas", marker = "extra == 'ui'", specifier = ">=2.2" },
-    { name = "playwright", specifier = ">=1.47" },
-    { name = "python-dateutil", specifier = ">=2.9" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "ruamel-yaml", marker = "extra == 'ui'", specifier = ">=0.18" },
-    { name = "streamlit", marker = "extra == 'ui'", specifier = ">=1.40" },
-]
-provides-extras = ["ui"]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.0" }]
-
-[[package]]
 name = "jsonschema"
 version = "4.26.0"
 source = { registry = "https://pypi.org/simple" }
@@ -868,6 +826,48 @@ sdist = { url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl", hash = "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746", size = 20538, upload-time = "2025-05-15T12:30:06.134Z" },
 ]
+
+[[package]]
+name = "postings-qa"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "lxml" },
+    { name = "openpyxl" },
+    { name = "playwright" },
+    { name = "python-dateutil" },
+    { name = "pyyaml" },
+]
+
+[package.optional-dependencies]
+ui = [
+    { name = "pandas" },
+    { name = "ruamel-yaml" },
+    { name = "streamlit" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "lxml", specifier = ">=5.0" },
+    { name = "openpyxl", specifier = ">=3.1" },
+    { name = "pandas", marker = "extra == 'ui'", specifier = ">=2.2" },
+    { name = "playwright", specifier = ">=1.47" },
+    { name = "python-dateutil", specifier = ">=2.9" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "ruamel-yaml", marker = "extra == 'ui'", specifier = ">=0.18" },
+    { name = "streamlit", marker = "extra == 'ui'", specifier = ">=1.40" },
+]
+provides-extras = ["ui"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.0" }]
 
 [[package]]
 name = "protobuf"

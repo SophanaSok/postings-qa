@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, timedelta
 
 _WS = re.compile(r"\s+")
 
@@ -73,7 +73,7 @@ def parse_relative_date(text: str | None, today: date | None = None) -> date | N
     """'3 days ago', '2 weeks ago', 'Just now', 'Today', 'Posted 30+ days ago', 'Active 1 day ago' -> date."""
     if not text:
         return None
-    today = today or datetime.now(timezone.utc).date()
+    today = today or date.today()  # local date, consistent with qa.checks.posting_age
     t = text.lower()
     if any(w in t for w in ("just now", "today", "just posted", "moments ago")):
         return today

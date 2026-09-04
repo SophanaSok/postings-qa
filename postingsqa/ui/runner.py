@@ -1,4 +1,4 @@
-"""Start, watch and stop a `jobbot run` subprocess from the UI.
+"""Start, watch and stop a `pqa run` subprocess from the UI.
 
 The scrape runs out of process on purpose: Playwright's sync API does not cooperate with Streamlit's
 script thread, a crash in an adapter must not take the UI down, and `--headed` needs to open a browser
@@ -20,7 +20,7 @@ import streamlit as st
 
 
 class RunManager:
-    MODULE = "jobbot.cli"  # overridden in tests with a stub
+    MODULE = "postingsqa.cli"  # overridden in tests with a stub
 
     def __init__(self, project_dir: Path):
         self.project_dir = Path(project_dir)

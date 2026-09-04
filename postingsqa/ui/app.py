@@ -1,14 +1,14 @@
-"""Streamlit entry point. Launch with `jobbot ui` (or `streamlit run jobbot/ui/app.py`)."""
+"""Streamlit entry point. Launch with `pqa ui` (or `streamlit run postingsqa/ui/app.py`)."""
 
 from __future__ import annotations
 
 import streamlit as st
 
-from jobbot.ui import data
-from jobbot.ui.runner import get_runner
-from jobbot.ui.views import dashboard, jobs, settings
+from postingsqa.ui import data
+from postingsqa.ui.runner import get_runner
+from postingsqa.ui.views import dashboard, jobs, settings
 
-st.set_page_config(page_title="jobbot", page_icon="🧭", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="postings-qa", page_icon="🧭", layout="wide", initial_sidebar_state="expanded")
 
 pages = [
     st.Page(dashboard.render, title="Dashboard", icon=":material/dashboard:", default=True),

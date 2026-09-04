@@ -5,9 +5,9 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 
-from jobbot.config import QAConfig
-from jobbot.models import Job, QAResult
-from jobbot.qa.checks import CHECKS
+from postingsqa.config import QAConfig
+from postingsqa.models import Job, QAResult
+from postingsqa.qa.checks import CHECKS
 
 
 @dataclass

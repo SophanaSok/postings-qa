@@ -7,9 +7,9 @@ import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 
-from jobbot.browser import BrowserSession, SourceBlocked
-from jobbot.config import Config
-from jobbot.models import Job
+from postingsqa.browser import BrowserSession, SourceBlocked
+from postingsqa.config import Config
+from postingsqa.models import Job
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class BaseSource(ABC):
     def __init__(self, config: Config, session: BrowserSession):
         self.config = config
         self.session = session
-        self.log = logging.getLogger(f"jobbot.sources.{self.name}")
+        self.log = logging.getLogger(f"postingsqa.sources.{self.name}")
         self.blocked_reason: str | None = None
 
     @abstractmethod

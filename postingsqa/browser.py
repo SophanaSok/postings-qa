@@ -10,7 +10,7 @@ from pathlib import Path
 
 from playwright.sync_api import APIRequestContext, BrowserContext, Page, Playwright, sync_playwright
 
-from jobbot.config import Config
+from postingsqa.config import Config
 
 log = logging.getLogger(__name__)
 

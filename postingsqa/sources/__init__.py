@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from jobbot.sources.base import BaseSource
+from postingsqa.sources.base import BaseSource
 
 _REGISTRY: dict[str, type[BaseSource]] = {}
 
@@ -25,10 +25,10 @@ def all_sources() -> dict[str, type[BaseSource]]:
 
 
 def _load() -> None:
-    from jobbot.sources import linkedin  # noqa: F401
+    from postingsqa.sources import linkedin  # noqa: F401
 
     try:
-        from jobbot.sources import indeed, glassdoor  # noqa: F401
+        from postingsqa.sources import indeed, glassdoor  # noqa: F401
     except ImportError:
         pass
     for mod in (linkedin, indeed, glassdoor):
